@@ -1,5 +1,6 @@
 package nl.yzaazy.coinchecker;
 
+import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -72,7 +73,11 @@ class ListAdapter extends BaseAdapter {
         viewHolder.button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                CryptoCoin coin = mList.get(position);
+                CoinToCheck coinToCheck = CoinToCheck.find(CoinToCheck.class, "name = ?", coin.getName()).get(0);
+                coinToCheck.delete();
                 mList.remove(position);
+                Snackbar.make(v, R.string.action_remove, Snackbar.LENGTH_SHORT).show();
                 notifyDataSetChanged();
             }
         });

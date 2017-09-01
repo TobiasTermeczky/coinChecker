@@ -10,4 +10,13 @@
     <string name="price">price</string>
     <string name="dollar">$ %1$s</string>
     <string name="percent">percent</string>
+    <string name="addCoin">Add coin to list</string>
+    <string name="addOption">Add</string>
+    <string name="cancelOption">Cancel</string>
+    <string name="refreshNotification">Refresh successful</string>
+    <string name="savedCoinToCheck">Saved coin to check</string>
+    <string name="action_removeAll">Remove all coins</string>
+    <string name="action_remove">Removed coin form list</string>
+    <string name="deleteAllNotification">All set coin checker are removed</string>
+    <string name="invalidCoinInput">The coin does not exist</string>
 </resources>
