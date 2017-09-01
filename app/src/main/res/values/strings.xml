@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">CoinChecker</string>
+    <string name="action_settings">Settings</string>
+    <string name="remove">remove</string>
+    <string name="clearicon">clearIcon</string>
+    <string name="placeholder">placeholder</string>
+    <string name="symbol">symbol</string>
+    <string name="percent_change_1h">percent_change_1h</string>
+    <string name="trending">trending</string>
+    <string name="price">price</string>
+    <string name="dollar">$ %1$s</string>
+    <string name="percent">percent</string>
+</resources>
