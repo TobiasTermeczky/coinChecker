@@ -16,78 +16,63 @@ import android.widget.Adapter;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
-
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
-import com.orm.SugarDb;
-import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import in.galaxyofandroid.spinerdialog.OnSpinerItemClick;
+import in.galaxyofandroid.spinerdialog.SpinnerDialog;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-    private List<String> mNameList = new ArrayList<>();
+    private ArrayList<String> mNameList = new ArrayList<>();
     private List<CryptoCoin> mList = new ArrayList<>();
     private ListView mListView;
     private ListAdapter mAdapter;
+    private SpinnerDialog spinnerDialog;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        mListView = (ListView) findViewById(R.id.listview);
+        mListView = findViewById(R.id.listview);
         UpdateUI();
-        final ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivity.this, R.layout.list_item, R.id.coin_name, mNameList);
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Collections.sort(mNameList);
-//                SearchableSpinner dialog = new SearchableSpinner;
-                MaterialDialog dialog = new MaterialDialog.Builder(MainActivity.this)
-                        .title(R.string.addCoin)
-                        .titleColor(getResources().getColor(R.color.colorPrimary))
-                        .backgroundColor(getResources().getColor(android.R.color.white))
-                        .customView(R.layout.dialog_add, true)
-                        .positiveText(R.string.addOption)
-                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                SearchableSpinner spinner = (SearchableSpinner) dialog.findViewById(R.id.spinner);
-                                CoinToCheck coinToCheck = new CoinToCheck(spinner.getSelectedItem().toString());
-                                if (CheckCoin(coinToCheck)) {
-                                    coinToCheck.save();
-                                    Snackbar.make(mListView, R.string.savedCoinToCheck, Snackbar.LENGTH_SHORT).show();
-                                    UpdateUI();
-                                    mAdapter.notifyDataSetChanged();
-                                } else {
-                                    Snackbar.make(mListView, R.string.invalidCoinInput, Snackbar.LENGTH_SHORT).show();
-                                    mAdapter.notifyDataSetChanged();
-                                }
-
-                            }
-                        })
-                        .positiveColor(getResources().getColor(R.color.colorPrimary))
-                        .negativeText(R.string.cancelOption)
-                        .negativeColor(getResources().getColor(R.color.colorAccent))
-                        .show();
+                System.out.println("Name list: " + mNameList.toString());
+                spinnerDialog = new SpinnerDialog(MainActivity.this,mNameList,MainActivity.this.getResources().getString(R.string.addCoin));
+                spinnerDialog.bindOnSpinerListener(new OnSpinerItemClick() {
+                    @Override
+                    public void onClick(String item, int position) {
+                        CoinToCheck coinToCheck = new CoinToCheck(item);
+                        if (CheckCoin(coinToCheck)) {
+                            coinToCheck.save();
+                            Snackbar.make(mListView, R.string.savedCoinToCheck, Snackbar.LENGTH_SHORT).show();
+                            UpdateUI();
+                            mAdapter.notifyDataSetChanged();
+                        } else {
+                            Snackbar.make(mListView, R.string.invalidCoinInput, Snackbar.LENGTH_SHORT).show();
+                            mAdapter.notifyDataSetChanged();
+                        }
+                    }
+                });
+                spinnerDialog.showSpinerDialog();
             }
         });
     }
@@ -122,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void UpdateUI() {
         mList.clear();
+        mNameList.clear();
         new GetCoinsJSON().execute("https://api.coinmarketcap.com/v1/ticker/?convert=EUR");
         mAdapter = new ListAdapter(mList, LayoutInflater.from(getApplicationContext()));
         mListView.setAdapter(mAdapter);
@@ -129,11 +115,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean CheckCoin(CoinToCheck coinToCheck) {
-        if (mNameList.contains(coinToCheck.name)) {
-            return true;
-        } else {
-            return false;
-        }
+        return mNameList.contains(coinToCheck.name);
 
     }
 
@@ -159,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
             super.onPostExecute(result);
 
             List<CoinToCheck> coinToChecksList = CoinToCheck.listAll(CoinToCheck.class);
-            List<String> coinToChecksNameList = new ArrayList<String>(coinToChecksList.size());
+            List<String> coinToChecksNameList = new ArrayList<>(coinToChecksList.size());
             for (CoinToCheck coinsToCheck : coinToChecksList) {
                 coinToChecksNameList.add(coinsToCheck != null ? coinsToCheck.getName() : null);
             }
