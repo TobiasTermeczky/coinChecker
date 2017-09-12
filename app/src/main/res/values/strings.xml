@@ -19,4 +19,7 @@
     <string name="action_remove">Removed coin form list</string>
     <string name="deleteAllNotification">All set coin checker are removed</string>
     <string name="duplicateCoinInput">The coin is already added</string>
+    <string name="action_switchCurrency">Switch Currency</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="switchCurrency">Switched currency</string>
 </resources>

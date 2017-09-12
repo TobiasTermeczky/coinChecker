@@ -10,7 +10,7 @@ public class CoinToCheck extends SugarRecord<CoinToCheck> {
 
     }
 
-    public CoinToCheck(String name){
+    CoinToCheck(String name){
         this.name = name;
     }
 

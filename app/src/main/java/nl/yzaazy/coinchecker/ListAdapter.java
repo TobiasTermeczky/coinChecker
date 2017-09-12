@@ -9,11 +9,16 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 
 class ListAdapter extends BaseAdapter {
     private List<CryptoCoin> mList;
     private LayoutInflater mInflater;
+    private OptionHelper optionHelper = new OptionHelper();
 
     ListAdapter(List<CryptoCoin> stringList, LayoutInflater mInflater){
         this.mList = stringList;
@@ -59,8 +64,17 @@ class ListAdapter extends BaseAdapter {
         CryptoCoin coin = mList.get(position);
         viewHolder.symbol.setText(coin.getSymbol());
         viewHolder.name.setText(coin.getName());
-        viewHolder.moneyImage.setImageResource(R.drawable.ic_dollar);
-        viewHolder.price.setText(String.valueOf(coin.getPrice_usd()));
+
+        DecimalFormat df = new DecimalFormat("0", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+        df.setMaximumFractionDigits(340); //340 = DecimalFormat.DOUBLE_FRACTION_DIGITS
+        if(Objects.equals(optionHelper.getCurrencyValue(), "euro")) {
+            viewHolder.moneyImage.setImageResource(R.drawable.ic_euro);
+            viewHolder.price.setText(df.format(coin.getPrice_eur()));
+        }else {
+            viewHolder.moneyImage.setImageResource(R.drawable.ic_dollar);
+            viewHolder.price.setText(df.format(coin.getPrice_usd()));
+        }
+
         viewHolder.percent.setText(String.valueOf(coin.getPercent_change_1h()));
         viewHolder.percentImage.setImageResource(R.drawable.ic_percent);
         if(coin.getPercent_change_1h() > 0){

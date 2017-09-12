@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import in.galaxyofandroid.spinerdialog.OnSpinerItemClick;
 import in.galaxyofandroid.spinerdialog.SpinnerDialog;
@@ -41,11 +42,12 @@ public class MainActivity extends AppCompatActivity {
     private ListView mListView;
     private ListAdapter mAdapter;
     private SpinnerDialog spinnerDialog;
-
+    private OptionHelper optionHelper = new OptionHelper();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        optionHelper.checkOptions();
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -104,6 +106,11 @@ public class MainActivity extends AppCompatActivity {
                 UpdateUI();
                 Snackbar.make(this.mListView, R.string.refreshNotification, Snackbar.LENGTH_SHORT).show();
                 return true;
+            case R.id.switch_currency:
+                optionHelper.switchCurrency();
+                UpdateUI();
+                Snackbar.make(this.mListView, R.string.switchCurrency, Snackbar.LENGTH_SHORT).show();
+
         }
         return super.onOptionsItemSelected(item);
     }
