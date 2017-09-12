@@ -8,6 +8,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Menu;
@@ -61,13 +62,15 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(String item, int position) {
                         CoinToCheck coinToCheck = new CoinToCheck(item);
-                        if (CheckCoin(coinToCheck)) {
+                        List<String> coinToChecksNameList = getCoinsToCheck();
+                        Log.i("DIT IS DE UITKOMST: ", "" + coinToChecksNameList.contains(coinToCheck.name));
+                        if (!coinToChecksNameList.contains(coinToCheck.name)) {
                             coinToCheck.save();
                             Snackbar.make(mListView, R.string.savedCoinToCheck, Snackbar.LENGTH_SHORT).show();
                             UpdateUI();
                             mAdapter.notifyDataSetChanged();
                         } else {
-                            Snackbar.make(mListView, R.string.invalidCoinInput, Snackbar.LENGTH_SHORT).show();
+                            Snackbar.make(mListView, R.string.duplicateCoinInput, Snackbar.LENGTH_SHORT).show();
                             mAdapter.notifyDataSetChanged();
                         }
                     }
@@ -114,11 +117,6 @@ public class MainActivity extends AppCompatActivity {
         mAdapter.notifyDataSetChanged();
     }
 
-    public boolean CheckCoin(CoinToCheck coinToCheck) {
-        return mNameList.contains(coinToCheck.name);
-
-    }
-
     private class GetCoinsJSON extends AsyncTask<String, String, String> {
         OkHttpClient client = new OkHttpClient();
 
@@ -140,12 +138,7 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
 
-            List<CoinToCheck> coinToChecksList = CoinToCheck.listAll(CoinToCheck.class);
-            List<String> coinToChecksNameList = new ArrayList<>(coinToChecksList.size());
-            for (CoinToCheck coinsToCheck : coinToChecksList) {
-                coinToChecksNameList.add(coinsToCheck != null ? coinsToCheck.getName() : null);
-            }
-            System.out.println(coinToChecksNameList.toString());
+            List<String> coinToChecksNameList = getCoinsToCheck();
 
             try {
                 JSONArray coinArray = new JSONArray(result);
@@ -158,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
                         cryptoCoin.setName(coin.getString("name"));
                         cryptoCoin.setSymbol(coin.getString("symbol"));
                         try {
-                            cryptoCoin.setPercent_change_1h(Double.parseDouble(coin.getString("percent_change_1h")));
+                            cryptoCoin.setPercent_change_1h(Double.parseDouble(coin.getString("percent_change_24h")));
                         } catch (NumberFormatException e) {
                             cryptoCoin.setPercent_change_1h(0.0);
                         }
@@ -180,5 +173,15 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+    }
+
+    private List<String> getCoinsToCheck() {
+        List<CoinToCheck> coinToChecksList = CoinToCheck.listAll(CoinToCheck.class);
+        List<String> coinToChecksNameList = new ArrayList<>(coinToChecksList.size());
+        for (CoinToCheck coinsToCheck : coinToChecksList) {
+            coinToChecksNameList.add(coinsToCheck != null ? coinsToCheck.getName() : null);
+        }
+        System.out.println("this: " + coinToChecksNameList.toString());
+        return coinToChecksNameList;
     }
 }
