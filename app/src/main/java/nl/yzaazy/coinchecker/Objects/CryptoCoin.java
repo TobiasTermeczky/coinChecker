@@ -1,4 +1,4 @@
-package nl.yzaazy.coinchecker;
+package nl.yzaazy.coinchecker.Objects;
 
 public class CryptoCoin {
     private String id;
@@ -6,7 +6,7 @@ public class CryptoCoin {
     private String symbol;
     private Double price_usd;
     private Double price_eur;
-    private Double percent_change_1h;
+    private Double percent_change_24h;
 
     public String getId() {
         return id;
@@ -48,11 +48,11 @@ public class CryptoCoin {
         this.price_eur = price_eur;
     }
 
-    public Double getPercent_change_1h() {
-        return percent_change_1h;
+    public Double getPercent_change_24h() {
+        return percent_change_24h;
     }
 
-    public void setPercent_change_1h(Double percent_change_1h) {
-        this.percent_change_1h = percent_change_1h;
+    public void setPercent_change_24h(Double percent_change_24h) {
+        this.percent_change_24h = percent_change_24h;
     }
 }

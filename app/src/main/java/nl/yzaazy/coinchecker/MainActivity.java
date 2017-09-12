@@ -2,22 +2,15 @@ package nl.yzaazy.coinchecker;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Adapter;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
+import android.view.View;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,10 +20,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import in.galaxyofandroid.spinerdialog.OnSpinerItemClick;
 import in.galaxyofandroid.spinerdialog.SpinnerDialog;
+import nl.yzaazy.coinchecker.Adapter.ListAdapter;
+import nl.yzaazy.coinchecker.Helpers.OptionHelper;
+import nl.yzaazy.coinchecker.Objects.CryptoCoin;
+import nl.yzaazy.coinchecker.Objects.TrackedCoin;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -59,20 +55,19 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Collections.sort(mNameList);
                 System.out.println("Name list: " + mNameList.toString());
-                spinnerDialog = new SpinnerDialog(MainActivity.this,mNameList,MainActivity.this.getResources().getString(R.string.addCoin));
+                spinnerDialog = new SpinnerDialog(MainActivity.this, mNameList, MainActivity.this.getResources().getString(R.string.add_coin));
                 spinnerDialog.bindOnSpinerListener(new OnSpinerItemClick() {
                     @Override
                     public void onClick(String item, int position) {
-                        CoinToCheck coinToCheck = new CoinToCheck(item);
-                        List<String> coinToChecksNameList = getCoinsToCheck();
-                        Log.i("DIT IS DE UITKOMST: ", "" + coinToChecksNameList.contains(coinToCheck.name));
-                        if (!coinToChecksNameList.contains(coinToCheck.name)) {
-                            coinToCheck.save();
-                            Snackbar.make(mListView, R.string.savedCoinToCheck, Snackbar.LENGTH_SHORT).show();
+                        TrackedCoin newTrackedCoin = new TrackedCoin();
+                        newTrackedCoin.setName(item);
+                        if (!getTrackedCoinNameList().contains(newTrackedCoin.name)) {
+                            newTrackedCoin.save();
+                            Snackbar.make(mListView, R.string.saved_coin_to_check, Snackbar.LENGTH_SHORT).show();
                             UpdateUI();
                             mAdapter.notifyDataSetChanged();
                         } else {
-                            Snackbar.make(mListView, R.string.duplicateCoinInput, Snackbar.LENGTH_SHORT).show();
+                            Snackbar.make(mListView, R.string.duplicate_coin_input, Snackbar.LENGTH_SHORT).show();
                             mAdapter.notifyDataSetChanged();
                         }
                     }
@@ -98,30 +93,39 @@ public class MainActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         switch (id) {
             case R.id.action_remove_all:
-                CoinToCheck.deleteAll(CoinToCheck.class);
+                TrackedCoin.deleteAll(TrackedCoin.class);
                 UpdateUI();
-                Snackbar.make(this.mListView, R.string.deleteAllNotification, Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(this.mListView, R.string.delete_all_notification, Snackbar.LENGTH_SHORT).show();
                 return true;
             case R.id.action_refresh:
                 UpdateUI();
-                Snackbar.make(this.mListView, R.string.refreshNotification, Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(this.mListView, R.string.refresh_notification, Snackbar.LENGTH_SHORT).show();
                 return true;
             case R.id.switch_currency:
                 optionHelper.switchCurrency();
                 UpdateUI();
-                Snackbar.make(this.mListView, R.string.switchCurrency, Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(this.mListView, R.string.switch_currency, Snackbar.LENGTH_SHORT).show();
 
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public void UpdateUI() {
+    private void UpdateUI() {
         mList.clear();
         mNameList.clear();
         new GetCoinsJSON().execute("https://api.coinmarketcap.com/v1/ticker/?convert=EUR");
-        mAdapter = new ListAdapter(mList, LayoutInflater.from(getApplicationContext()));
+        mAdapter = new ListAdapter(getApplicationContext(), mList, LayoutInflater.from(getApplicationContext()));
         mListView.setAdapter(mAdapter);
         mAdapter.notifyDataSetChanged();
+    }
+
+    private List<String> getTrackedCoinNameList() {
+        List<TrackedCoin> trackedCoinList = TrackedCoin.listAll(TrackedCoin.class);
+        List<String> trackedCoinNameList = new ArrayList<>(trackedCoinList.size());
+        for (TrackedCoin trackedCoin : trackedCoinList) {
+            trackedCoinNameList.add(trackedCoin != null ? trackedCoin.getName() : null);
+        }
+        return trackedCoinNameList;
     }
 
     private class GetCoinsJSON extends AsyncTask<String, String, String> {
@@ -145,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
 
-            List<String> coinToChecksNameList = getCoinsToCheck();
+            List<String> coinToChecksNameList = getTrackedCoinNameList();
 
             try {
                 JSONArray coinArray = new JSONArray(result);
@@ -158,9 +162,9 @@ public class MainActivity extends AppCompatActivity {
                         cryptoCoin.setName(coin.getString("name"));
                         cryptoCoin.setSymbol(coin.getString("symbol"));
                         try {
-                            cryptoCoin.setPercent_change_1h(Double.parseDouble(coin.getString("percent_change_24h")));
+                            cryptoCoin.setPercent_change_24h(Double.parseDouble(coin.getString("percent_change_24h")));
                         } catch (NumberFormatException e) {
-                            cryptoCoin.setPercent_change_1h(0.0);
+                            cryptoCoin.setPercent_change_24h(0.0);
                         }
                         try {
                             cryptoCoin.setPrice_usd(Double.parseDouble(coin.getString("price_usd")));
@@ -182,13 +186,4 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private List<String> getCoinsToCheck() {
-        List<CoinToCheck> coinToChecksList = CoinToCheck.listAll(CoinToCheck.class);
-        List<String> coinToChecksNameList = new ArrayList<>(coinToChecksList.size());
-        for (CoinToCheck coinsToCheck : coinToChecksList) {
-            coinToChecksNameList.add(coinsToCheck != null ? coinsToCheck.getName() : null);
-        }
-        System.out.println("this: " + coinToChecksNameList.toString());
-        return coinToChecksNameList;
-    }
 }

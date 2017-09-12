@@ -1,4 +1,4 @@
-package nl.yzaazy.coinchecker;
+package nl.yzaazy.coinchecker.Objects;
 
 import com.orm.SugarRecord;
 
@@ -7,19 +7,19 @@ public class Options extends SugarRecord<Options> {
     private String option;
     private String value;
 
-    String getOption() {
+    public String getOption() {
         return option;
     }
 
-    void setOption(String option) {
+    public void setOption(String option) {
         this.option = option;
     }
 
-    String getValue() {
+    public String getValue() {
         return value;
     }
 
-    void setValue(String value) {
+    public void setValue(String value) {
         this.value = value;
     }
 }

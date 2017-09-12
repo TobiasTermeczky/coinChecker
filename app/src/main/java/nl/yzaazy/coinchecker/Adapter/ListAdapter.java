@@ -1,5 +1,7 @@
-package nl.yzaazy.coinchecker;
+package nl.yzaazy.coinchecker.Adapter;
 
+import android.content.Context;
+import android.graphics.Color;
 import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,14 +17,21 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-class ListAdapter extends BaseAdapter {
+import nl.yzaazy.coinchecker.Helpers.OptionHelper;
+import nl.yzaazy.coinchecker.Objects.CryptoCoin;
+import nl.yzaazy.coinchecker.Objects.TrackedCoin;
+import nl.yzaazy.coinchecker.R;
+
+public class ListAdapter extends BaseAdapter {
     private List<CryptoCoin> mList;
     private LayoutInflater mInflater;
     private OptionHelper optionHelper = new OptionHelper();
+    private Context context;
 
-    ListAdapter(List<CryptoCoin> stringList, LayoutInflater mInflater){
+    public ListAdapter(Context context, List<CryptoCoin> stringList, LayoutInflater mInflater){
         this.mList = stringList;
         this.mInflater = mInflater;
+        this.context = context;
     }
 
     @Override
@@ -44,52 +53,46 @@ class ListAdapter extends BaseAdapter {
     public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder;
         if (convertView == null) {
-            convertView = mInflater.inflate(R.layout.bitcoin_row, null);
-
+            convertView = mInflater.inflate(R.layout.coin_row, parent, false);
             viewHolder = new ViewHolder();
-            viewHolder.symbol = convertView.findViewById(R.id.textSymbol);
+            viewHolder.icon = convertView.findViewById(R.id.ivIcon);
             viewHolder.name = convertView.findViewById(R.id.txtName);
-            viewHolder.moneyImage = convertView.findViewById(R.id.imageMoney);
             viewHolder.price = convertView.findViewById(R.id.textPrice);
-            viewHolder.percent = convertView.findViewById(R.id.textPercentChange1h);
-            viewHolder.percentImage = convertView.findViewById(R.id.imagePercent);
-            viewHolder.trending = convertView.findViewById(R.id.imageTrending);
+            viewHolder.percent = convertView.findViewById(R.id.textPercentChange24h);
             viewHolder.button = convertView.findViewById(R.id.btnRow);
-
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-
         CryptoCoin coin = mList.get(position);
-        viewHolder.symbol.setText(coin.getSymbol());
+
+        viewHolder.icon.setImageResource(R.drawable.ic_no_image);
+        viewHolder.icon.setAlpha(0.3f);
         viewHolder.name.setText(coin.getName());
 
+        //Money per coin
         DecimalFormat df = new DecimalFormat("0", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
         df.setMaximumFractionDigits(340); //340 = DecimalFormat.DOUBLE_FRACTION_DIGITS
         if(Objects.equals(optionHelper.getCurrencyValue(), "euro")) {
-            viewHolder.moneyImage.setImageResource(R.drawable.ic_euro);
-            viewHolder.price.setText(df.format(coin.getPrice_eur()));
+            viewHolder.price.setText(context.getString(R.string.euro, df.format(coin.getPrice_eur())));
         }else {
-            viewHolder.moneyImage.setImageResource(R.drawable.ic_dollar);
-            viewHolder.price.setText(df.format(coin.getPrice_usd()));
+            viewHolder.price.setText(context.getString(R.string.dollar, df.format(coin.getPrice_usd())));
         }
 
-        viewHolder.percent.setText(String.valueOf(coin.getPercent_change_1h()));
-        viewHolder.percentImage.setImageResource(R.drawable.ic_percent);
-        if(coin.getPercent_change_1h() > 0){
-            viewHolder.trending.setImageResource(R.drawable.ic_trending_up);
-        }else if(coin.getPercent_change_1h() < 0){
-            viewHolder.trending.setImageResource(R.drawable.ic_trending_down);
+        //percent
+        viewHolder.percent.setText(String.valueOf(coin.getPercent_change_24h() + "%"));
+        if(coin.getPercent_change_24h() > 0){
+            viewHolder.percent.setTextColor(Color.parseColor("#006400"));
+        }else if(coin.getPercent_change_24h() < 0){
+            viewHolder.percent.setTextColor(Color.RED);
         }
-
 
         viewHolder.button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 CryptoCoin coin = mList.get(position);
-                CoinToCheck coinToCheck = CoinToCheck.find(CoinToCheck.class, "name = ?", coin.getName()).get(0);
-                coinToCheck.delete();
+                TrackedCoin trackedCoin = TrackedCoin.find(TrackedCoin.class, "name = ?", coin.getName()).get(0);
+                trackedCoin.delete();
                 mList.remove(position);
                 Snackbar.make(v, R.string.action_remove, Snackbar.LENGTH_SHORT).show();
                 notifyDataSetChanged();
@@ -100,13 +103,10 @@ class ListAdapter extends BaseAdapter {
     }
 
     private static class ViewHolder {
+        ImageView icon;
         TextView name;
-        TextView symbol;
         TextView price;
         TextView percent;
-        ImageView trending;
         ImageButton button;
-        ImageView moneyImage;
-        ImageView percentImage;
     }
 }

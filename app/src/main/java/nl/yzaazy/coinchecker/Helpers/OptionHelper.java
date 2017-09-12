@@ -1,13 +1,15 @@
-package nl.yzaazy.coinchecker;
+package nl.yzaazy.coinchecker.Helpers;
 
 import android.util.Log;
 
 import java.util.List;
 import java.util.Objects;
 
-class OptionHelper {
+import nl.yzaazy.coinchecker.Objects.Options;
 
-    String getCurrencyValue(){
+public class OptionHelper {
+
+    public String getCurrencyValue(){
         List<Options> list = Options.listAll(Options.class);
         for (int i = 0; i <= list.size(); i++) {
             if(Objects.equals(list.get(i).getOption(), "Currency")){
@@ -17,7 +19,7 @@ class OptionHelper {
         return null;
     }
 
-    Options getCurrencyOption(){
+    public Options getCurrencyOption(){
         List<Options> list = Options.listAll(Options.class);
         for (int i = 0; i <= list.size(); i++) {
             if(Objects.equals(list.get(i).getOption(), "Currency")){
@@ -27,7 +29,7 @@ class OptionHelper {
         return null;
     }
 
-    void checkOptions() {
+    public void checkOptions() {
         List<Options> list = Options.listAll(Options.class);
         Log.i("options list: ", list.toString());
         boolean isInList = false;
@@ -46,7 +48,7 @@ class OptionHelper {
         }
     }
 
-    void switchCurrency() {
+    public void switchCurrency() {
         Options currencyOption = getCurrencyOption();
         if(Objects.equals(currencyOption.getValue(), "dollar")) {
             currencyOption.setValue("euro");
