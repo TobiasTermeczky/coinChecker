@@ -27,7 +27,7 @@ import cn.pedant.SweetAlert.SweetAlertDialog;
 import in.galaxyofandroid.spinerdialog.OnSpinerItemClick;
 import in.galaxyofandroid.spinerdialog.SpinnerDialog;
 import nl.yzaazy.coinchecker.Adapter.ListAdapter;
-import nl.yzaazy.coinchecker.Helpers.CoinInfoGetter;
+import nl.yzaazy.coinchecker.Task.CoinInfoGetter;
 import nl.yzaazy.coinchecker.Helpers.SettingsHelper;
 import nl.yzaazy.coinchecker.Objects.CryptoCoin;
 import nl.yzaazy.coinchecker.Objects.TrackedCoin;
