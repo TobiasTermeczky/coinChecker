@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-import nl.yzaazy.coinchecker.Helpers.OptionHelper;
+import nl.yzaazy.coinchecker.Helpers.SettingsHelper;
 import nl.yzaazy.coinchecker.Objects.CryptoCoin;
 import nl.yzaazy.coinchecker.Objects.TrackedCoin;
 import nl.yzaazy.coinchecker.R;
@@ -25,7 +25,7 @@ import nl.yzaazy.coinchecker.R;
 public class ListAdapter extends BaseAdapter {
     private List<CryptoCoin> mList;
     private LayoutInflater mInflater;
-    private OptionHelper optionHelper = new OptionHelper();
+    private SettingsHelper settingsHelper = new SettingsHelper();
     private Context context;
 
     public ListAdapter(Context context, List<CryptoCoin> stringList, LayoutInflater mInflater){
@@ -73,7 +73,7 @@ public class ListAdapter extends BaseAdapter {
         //Money per coin
         DecimalFormat df = new DecimalFormat("0", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
         df.setMaximumFractionDigits(340); //340 = DecimalFormat.DOUBLE_FRACTION_DIGITS
-        if(Objects.equals(optionHelper.getCurrencyValue(), "euro")) {
+        if(Objects.equals(settingsHelper.getCurrencyValue(), "euro")) {
             viewHolder.price.setText(context.getString(R.string.euro, df.format(coin.getPrice_eur())));
         }else {
             viewHolder.price.setText(context.getString(R.string.dollar, df.format(coin.getPrice_usd())));

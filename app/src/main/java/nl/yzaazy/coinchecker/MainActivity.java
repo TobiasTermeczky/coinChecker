@@ -1,11 +1,14 @@
 package nl.yzaazy.coinchecker;
 
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,13 +21,14 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import in.galaxyofandroid.spinerdialog.OnSpinerItemClick;
 import in.galaxyofandroid.spinerdialog.SpinnerDialog;
 import nl.yzaazy.coinchecker.Adapter.ListAdapter;
-import nl.yzaazy.coinchecker.Helpers.OptionHelper;
+import nl.yzaazy.coinchecker.Helpers.CoinInfoGetter;
+import nl.yzaazy.coinchecker.Helpers.SettingsHelper;
 import nl.yzaazy.coinchecker.Objects.CryptoCoin;
 import nl.yzaazy.coinchecker.Objects.TrackedCoin;
 import okhttp3.OkHttpClient;
@@ -33,46 +37,40 @@ import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ArrayList<String> mNameList = new ArrayList<>();
-    private List<CryptoCoin> mList = new ArrayList<>();
-    private ListView mListView;
-    private ListAdapter mAdapter;
-    private SpinnerDialog spinnerDialog;
-    private OptionHelper optionHelper = new OptionHelper();
+    String TAG = getClass().getName();
+    SettingsHelper mSettingsHelper = new SettingsHelper();
+    ArrayList<String> mNameList = new ArrayList<>();
+    List<CryptoCoin> mList = new ArrayList<>();
+    SwipeRefreshLayout mSwipeRefreshLayout;
+    SpinnerDialog mSpinnerDialog;
+    ListView mListView;
+    ListAdapter mAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        optionHelper.checkOptions();
+        mSettingsHelper.checkSettings();
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        mListView = findViewById(R.id.listview);
-        UpdateUI();
+        mListView = findViewById(R.id.lvCoins);
+        updateUI();
+        //Swipe Refresh Layout
+        mSwipeRefreshLayout = findViewById(R.id.srlCoins);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                updateUI();
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
+        //Floating Action Button
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Collections.sort(mNameList);
-                System.out.println("Name list: " + mNameList.toString());
-                spinnerDialog = new SpinnerDialog(MainActivity.this, mNameList, MainActivity.this.getResources().getString(R.string.add_coin));
-                spinnerDialog.bindOnSpinerListener(new OnSpinerItemClick() {
-                    @Override
-                    public void onClick(String item, int position) {
-                        TrackedCoin newTrackedCoin = new TrackedCoin();
-                        newTrackedCoin.setName(item);
-                        if (!getTrackedCoinNameList().contains(newTrackedCoin.name)) {
-                            newTrackedCoin.save();
-                            Snackbar.make(mListView, R.string.saved_coin_to_check, Snackbar.LENGTH_SHORT).show();
-                            UpdateUI();
-                            mAdapter.notifyDataSetChanged();
-                        } else {
-                            Snackbar.make(mListView, R.string.duplicate_coin_input, Snackbar.LENGTH_SHORT).show();
-                            mAdapter.notifyDataSetChanged();
-                        }
-                    }
-                });
-                spinnerDialog.showSpinerDialog();
+                fillFabButton();
             }
         });
     }
@@ -94,23 +92,23 @@ public class MainActivity extends AppCompatActivity {
         switch (id) {
             case R.id.action_remove_all:
                 TrackedCoin.deleteAll(TrackedCoin.class);
-                UpdateUI();
+                updateUI();
                 Snackbar.make(this.mListView, R.string.delete_all_notification, Snackbar.LENGTH_SHORT).show();
                 return true;
             case R.id.action_refresh:
-                UpdateUI();
+                updateUI();
                 Snackbar.make(this.mListView, R.string.refresh_notification, Snackbar.LENGTH_SHORT).show();
                 return true;
             case R.id.switch_currency:
-                optionHelper.switchCurrency();
-                UpdateUI();
+                mSettingsHelper.switchCurrency();
+                updateUI();
                 Snackbar.make(this.mListView, R.string.switch_currency, Snackbar.LENGTH_SHORT).show();
 
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void UpdateUI() {
+    private void updateUI() {
         mList.clear();
         mNameList.clear();
         new GetCoinsJSON().execute("https://api.coinmarketcap.com/v1/ticker/?convert=EUR");
@@ -126,6 +124,34 @@ public class MainActivity extends AppCompatActivity {
             trackedCoinNameList.add(trackedCoin != null ? trackedCoin.getName() : null);
         }
         return trackedCoinNameList;
+    }
+
+    private void fillFabButton() {
+        Log.i(TAG, "Getting new JSON");
+        SweetAlertDialog pDialog = new SweetAlertDialog(MainActivity.this, SweetAlertDialog.PROGRESS_TYPE);
+        pDialog.getProgressHelper().setBarColor(Color.parseColor("#3F51B5"));
+        pDialog.setTitleText("Loading");
+        pDialog.setCancelable(false);
+        pDialog.show();
+        mSpinnerDialog = new SpinnerDialog(MainActivity.this, mNameList, MainActivity.this.getResources().getString(R.string.add_coin));
+        CoinInfoGetter mCoinInfoGetter = new CoinInfoGetter(getApplicationContext(), mNameList, mSpinnerDialog, pDialog);
+        mCoinInfoGetter.getAllCoins();
+        mSpinnerDialog.bindOnSpinerListener(new OnSpinerItemClick() {
+            @Override
+            public void onClick(String item, int position) {
+                TrackedCoin newTrackedCoin = new TrackedCoin();
+                newTrackedCoin.setName(item);
+                if (!getTrackedCoinNameList().contains(newTrackedCoin.name)) {
+                    newTrackedCoin.save();
+                    Snackbar.make(mListView, R.string.saved_coin_to_check, Snackbar.LENGTH_SHORT).show();
+                    updateUI();
+                    mAdapter.notifyDataSetChanged();
+                } else {
+                    Snackbar.make(mListView, R.string.duplicate_coin_input, Snackbar.LENGTH_SHORT).show();
+                    mAdapter.notifyDataSetChanged();
+                }
+            }
+        });
     }
 
     private class GetCoinsJSON extends AsyncTask<String, String, String> {
@@ -155,7 +181,6 @@ public class MainActivity extends AppCompatActivity {
                 JSONArray coinArray = new JSONArray(result);
                 for (int i = 0; i <= coinArray.length(); i++) {
                     JSONObject coin = coinArray.getJSONObject(i);
-                    mNameList.add(coin.getString("name"));
                     if (coinToChecksNameList.contains(coin.getString("name"))) {
                         CryptoCoin cryptoCoin = new CryptoCoin();
                         cryptoCoin.setId(coin.getString("id"));
