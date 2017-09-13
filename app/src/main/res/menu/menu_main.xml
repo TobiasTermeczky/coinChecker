@@ -18,4 +18,8 @@
         android:orderInCategory="99"
         android:title="@string/action_switch_currency"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/force_database"
+        android:orderInCategory="101"
+        android:title="@string/action_force_database" />
 </menu>

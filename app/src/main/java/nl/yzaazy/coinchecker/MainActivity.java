@@ -21,7 +21,9 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 import in.galaxyofandroid.spinerdialog.OnSpinerItemClick;
@@ -103,6 +105,11 @@ public class MainActivity extends AppCompatActivity {
                 mSettingsHelper.switchCurrency();
                 updateUI();
                 Snackbar.make(this.mListView, R.string.switch_currency, Snackbar.LENGTH_SHORT).show();
+                return true;
+            case R.id.force_database:
+                mSettingsHelper.setJSONDate(new Date(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1)));
+                Snackbar.make(this.mListView, R.string.force_database, Snackbar.LENGTH_SHORT).show();
+                return true;
 
         }
         return super.onOptionsItemSelected(item);

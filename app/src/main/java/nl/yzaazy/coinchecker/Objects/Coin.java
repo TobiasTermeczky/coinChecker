@@ -1,6 +1,8 @@
 package nl.yzaazy.coinchecker.Objects;
 
-public class Coin {
+import com.orm.SugarRecord;
+
+public class Coin extends SugarRecord<TrackedCoin> {
     String Id;
     String Url;
     String ImageUrl;

@@ -24,4 +24,6 @@
     <string name="action_refresh">Refresh</string>
     <string name="switch_currency">Switched currency</string>
     <string name="icon">icon</string>
+    <string name="action_force_database">Force Update DB</string>
+    <string name="force_database">Reload database form internet next time</string>
 </resources>
