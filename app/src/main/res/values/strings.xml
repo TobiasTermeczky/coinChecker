@@ -26,4 +26,6 @@
     <string name="icon">icon</string>
     <string name="action_force_database">Force Update DB</string>
     <string name="force_database">Reload database form internet next time</string>
+    <string name="coin_internet">Loading coins from internet</string>
+    <string name="coin_database">Loading coins from database</string>
 </resources>

@@ -29,7 +29,7 @@ import cn.pedant.SweetAlert.SweetAlertDialog;
 import in.galaxyofandroid.spinerdialog.OnSpinerItemClick;
 import in.galaxyofandroid.spinerdialog.SpinnerDialog;
 import nl.yzaazy.coinchecker.Adapter.ListAdapter;
-import nl.yzaazy.coinchecker.Task.CoinInfoGetter;
+import nl.yzaazy.coinchecker.Helpers.CoinInfoGetter;
 import nl.yzaazy.coinchecker.Helpers.SettingsHelper;
 import nl.yzaazy.coinchecker.Objects.CryptoCoin;
 import nl.yzaazy.coinchecker.Objects.TrackedCoin;
@@ -137,9 +137,7 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "Getting new JSON");
         SweetAlertDialog pDialog = new SweetAlertDialog(MainActivity.this, SweetAlertDialog.PROGRESS_TYPE);
         pDialog.getProgressHelper().setBarColor(Color.parseColor("#3F51B5"));
-        pDialog.setTitleText("Loading");
         pDialog.setCancelable(false);
-        pDialog.show();
         mSpinnerDialog = new SpinnerDialog(MainActivity.this, mNameList, MainActivity.this.getResources().getString(R.string.add_coin));
         CoinInfoGetter mCoinInfoGetter = new CoinInfoGetter(getApplicationContext(), mNameList, mSpinnerDialog, pDialog);
         mCoinInfoGetter.getAllCoins();

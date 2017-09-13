@@ -3,7 +3,7 @@ package nl.yzaazy.coinchecker.Objects;
 import com.orm.SugarRecord;
 
 public class Coin extends SugarRecord<TrackedCoin> {
-    String Id;
+    Long Id;
     String Url;
     String ImageUrl;
     String Name;

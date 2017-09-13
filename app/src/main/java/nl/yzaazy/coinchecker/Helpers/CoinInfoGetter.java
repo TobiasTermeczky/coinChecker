@@ -1,10 +1,8 @@
-package nl.yzaazy.coinchecker.Task;
+package nl.yzaazy.coinchecker.Helpers;
 
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.ProgressBar;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -12,26 +10,23 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.gson.Gson;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 import in.galaxyofandroid.spinerdialog.SpinnerDialog;
-import nl.yzaazy.coinchecker.Helpers.SettingsHelper;
-import nl.yzaazy.coinchecker.Objects.Coin;
+import nl.yzaazy.coinchecker.Interface.OnTaskCompleted;
+import nl.yzaazy.coinchecker.R;
+import nl.yzaazy.coinchecker.Task.DatabaseCoinInfoGetter;
+import nl.yzaazy.coinchecker.Task.JSONCoinInfoParser;
 
-public class CoinInfoGetter extends AsyncTask<JSONObject, Integer, ArrayList<String>> {
+public class CoinInfoGetter implements OnTaskCompleted {
     SettingsHelper settingsHelper = new SettingsHelper();
     String TAG = getClass().getName();
-    Gson mGson = new Gson();
     Context mContext;
     ArrayList<String> mNameList;
     SpinnerDialog mSpinnerDialog;
@@ -44,23 +39,35 @@ public class CoinInfoGetter extends AsyncTask<JSONObject, Integer, ArrayList<Str
         this.mPDialog = pDialog;
     }
 
+    @Override
+    public void coinInfoGetterCallback(ArrayList<String> NameList) {
+        updateUI(NameList);
+    }
+
     public void getAllCoins() {
-        mNameList.clear();
-        long MILLIS_PER_DAY = 24 * 60 * 60 * 1000L;
+        boolean moreThanDay = true;
+
         Date date1 = settingsHelper.getJSONDate();
-        Log.i(TAG, date1.toString());
-        Date date2 = new Date();
-        boolean moreThanDay = Math.abs(date1.getTime() - date2.getTime()) > MILLIS_PER_DAY;
-        Log.i(TAG, "" + moreThanDay);
-        System.out.println(moreThanDay);
+        if (date1 != null) {
+            Log.i(TAG, date1.toString());
+            Date date2 = new Date();
+            Log.i(TAG, date2.toString());
+            long MILLIS_PER_DAY = 24 * 60 * 60 * 1000L;
+            moreThanDay = Math.abs(date1.getTime() - date2.getTime()) > MILLIS_PER_DAY;
+            Log.i(TAG, "" + moreThanDay);
+            System.out.println(moreThanDay);
+        }
+
         if (moreThanDay) {
+            mPDialog.setTitleText(mContext.getString(R.string.coin_internet));
+            mPDialog.show();
             Log.i(TAG, "Getting data from JSON");
             RequestQueue queue = Volley.newRequestQueue(mContext);
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
                     (Request.Method.GET, "https://www.cryptocompare.com/api/data/coinlist/", null, new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
-                            execute(response);
+                            new JSONCoinInfoParser(CoinInfoGetter.this).execute(response);
                         }
                     }, new Response.ErrorListener() {
                         @Override
@@ -70,44 +77,17 @@ public class CoinInfoGetter extends AsyncTask<JSONObject, Integer, ArrayList<Str
                     });
             queue.add(jsonObjectRequest);
         } else {
+            mPDialog.setTitleText(mContext.getString(R.string.coin_database));
+            mPDialog.show();
             Log.i(TAG, "Getting data from database");
-            List<Coin> coinList = Coin.listAll(Coin.class);
-            for (Coin coin : coinList) {
-                mNameList.add(coin.getCoinName());
-            }
-            updateUI();
+            new DatabaseCoinInfoGetter(this).execute();
         }
-
     }
 
-    @Override
-    protected ArrayList<String> doInBackground(JSONObject... jsonObjects) {
-        JSONObject response = jsonObjects[0];
-        try {
-            JSONObject data = response.getJSONObject("Data");
-            Iterator<String> temp = data.keys();
-            Coin.deleteAll(Coin.class);
-            while (temp.hasNext()) {
-                String key = temp.next();
-                String value = data.getJSONObject(key).toString();
-                System.out.println(value);
-                Coin coin = mGson.fromJson(value, Coin.class);
-                coin.save();
-                mNameList.add(coin.getCoinName());
-            }
-            settingsHelper.setJSONDate(new Date());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return mNameList;
-    }
-
-    @Override
-    protected void onPostExecute(ArrayList<String> mNameList) {
-        updateUI();
-    }
-
-    private void updateUI() {
+    private void updateUI(ArrayList<String> NameList) {
+        mNameList.clear();
+        System.out.println("updateUI: " + mNameList.toString());
+        mNameList.addAll(NameList);
         Collections.sort(mNameList);
         mPDialog.cancel();
         mSpinnerDialog.showSpinerDialog();
