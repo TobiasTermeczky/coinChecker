@@ -50,7 +50,7 @@ public class JSONCoinInfoParser extends AsyncTask<JSONObject, Integer, ArrayList
     }
 
     @Override
-    protected void onPostExecute(ArrayList<String> mNameList) {
-        mListener.coinInfoGetterCallback(mNameList);
+        protected void onPostExecute(ArrayList<String> mNameList) {
+            mListener.coinInfoGetterCallback(mNameList);
     }
 }
