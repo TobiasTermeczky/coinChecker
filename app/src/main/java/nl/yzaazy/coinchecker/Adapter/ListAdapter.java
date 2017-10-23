@@ -64,6 +64,7 @@ public class ListAdapter extends BaseAdapter {
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
+
         CryptoCoin coin = mList.get(position);
 
         viewHolder.icon.setImageResource(R.drawable.ic_no_image);
