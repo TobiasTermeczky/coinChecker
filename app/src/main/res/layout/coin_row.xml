@@ -10,7 +10,7 @@
 
 
     <TextView
-        android:id="@+id/txtName"
+        android:id="@+id/txtFullName"
         android:layout_width="wrap_content"
         android:layout_height="24dp"
         android:layout_marginLeft="8dp"
@@ -49,7 +49,7 @@
         android:id="@+id/textPercentChange24h"
         android:layout_width="wrap_content"
         android:layout_height="20dp"
-        android:text="@string/percent_change_24h"
+        android:text="@string/percentChange24h"
         android:layout_marginRight="8dp"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"

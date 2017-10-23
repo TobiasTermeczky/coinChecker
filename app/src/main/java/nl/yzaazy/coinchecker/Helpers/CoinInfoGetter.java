@@ -4,6 +4,7 @@ package nl.yzaazy.coinchecker.Helpers;
 import android.content.Context;
 import android.util.Log;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -55,13 +56,11 @@ public class CoinInfoGetter implements OnTaskCompleted {
             long MILLIS_PER_DAY = 24 * 60 * 60 * 1000L;
             moreThanDay = Math.abs(date1.getTime() - date2.getTime()) > MILLIS_PER_DAY;
             Log.i(TAG, "" + moreThanDay);
-            System.out.println(moreThanDay);
         }
 
         if (moreThanDay) {
             mPDialog.setTitleText(mContext.getString(R.string.coin_internet));
             mPDialog.show();
-            Log.i(TAG, "Getting data from JSON");
             RequestQueue queue = Volley.newRequestQueue(mContext);
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
                     (Request.Method.GET, "https://www.cryptocompare.com/api/data/coinlist/", null, new Response.Listener<JSONObject>() {
@@ -72,21 +71,23 @@ public class CoinInfoGetter implements OnTaskCompleted {
                     }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            Log.e(TAG, error.toString());
+                            mPDialog.cancel();
+                            mPDialog.setTitleText(mContext.getString(R.string.coin_database_no_internet));
+                            mPDialog.show();
+                            new DatabaseCoinInfoGetter(CoinInfoGetter.this).execute();
                         }
                     });
+            jsonObjectRequest.setShouldCache(false);
             queue.add(jsonObjectRequest);
         } else {
             mPDialog.setTitleText(mContext.getString(R.string.coin_database));
             mPDialog.show();
-            Log.i(TAG, "Getting data from database");
             new DatabaseCoinInfoGetter(this).execute();
         }
     }
 
     private void updateUI(ArrayList<String> NameList) {
         mNameList.clear();
-        System.out.println("updateUI: " + mNameList.toString());
         mNameList.addAll(NameList);
         Collections.sort(mNameList);
         mPDialog.cancel();

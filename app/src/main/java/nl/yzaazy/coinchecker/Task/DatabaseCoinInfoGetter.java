@@ -21,7 +21,7 @@ public class DatabaseCoinInfoGetter extends AsyncTask<String, Integer, ArrayList
     protected ArrayList<String> doInBackground(String... strings) {
         List<Coin> coinList = Coin.listAll(Coin.class);
         for (Coin coin : coinList) {
-            mNameList.add(coin.getCoinName());
+            mNameList.add(coin.getName());
         }
         return mNameList;
     }

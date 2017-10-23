@@ -5,7 +5,7 @@
     <string name="clear_icon">clearIcon</string>
     <string name="placeholder">placeholder</string>
     <string name="symbol">symbol</string>
-    <string name="percent_change_24h">percent_change_24h</string>
+    <string name="percentChange24h">percentChange24h</string>
     <string name="trending">trending</string>
     <string name="price">price</string>
     <string name="dollar">$ %1$s</string>
@@ -28,4 +28,5 @@
     <string name="force_database">Reload database form internet next time</string>
     <string name="coin_internet">Loading coins from internet</string>
     <string name="coin_database">Loading coins from database</string>
+    <string name="coin_database_no_internet">No internet! Loading database</string>
 </resources>

@@ -50,16 +50,6 @@ public class SettingsHelper {
         }
     }
 
-    public String getCurrencyValue() {
-        List<Settings> list = Settings.listAll(Settings.class);
-        for (int i = 0; i < list.size(); i++) {
-            if (Objects.equals(list.get(i).getSetting(), "Currency")) {
-                return list.get(i).getValue();
-            }
-        }
-        return null;
-    }
-
     public void checkSettings() {
         List<Settings> list = Settings.listAll(Settings.class);
         Log.i("settings list: ", list.toString());
@@ -77,6 +67,16 @@ public class SettingsHelper {
             setting.setValue("dollar");
             setting.save();
         }
+    }
+
+    public String getCurrency() {
+        List<Settings> list = Settings.listAll(Settings.class);
+        for (int i = 0; i < list.size(); i++) {
+            if (Objects.equals(list.get(i).getSetting(), "Currency")) {
+                return list.get(i).getValue();
+            }
+        }
+        return null;
     }
 
     public void switchCurrency() {

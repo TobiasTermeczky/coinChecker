@@ -31,8 +31,8 @@ import in.galaxyofandroid.spinerdialog.SpinnerDialog;
 import nl.yzaazy.coinchecker.Adapter.ListAdapter;
 import nl.yzaazy.coinchecker.Helpers.CoinInfoGetter;
 import nl.yzaazy.coinchecker.Helpers.SettingsHelper;
-import nl.yzaazy.coinchecker.Objects.CryptoCoin;
-import nl.yzaazy.coinchecker.Objects.TrackedCoin;
+import nl.yzaazy.coinchecker.Objects.Coin;
+
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     String TAG = getClass().getName();
     SettingsHelper mSettingsHelper = new SettingsHelper();
     ArrayList<String> mNameList = new ArrayList<>();
-    List<CryptoCoin> mList = new ArrayList<>();
+    List<Coin> mList = new ArrayList<>();
     SwipeRefreshLayout mSwipeRefreshLayout;
     SpinnerDialog mSpinnerDialog;
     ListView mListView;
@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         switch (id) {
             case R.id.action_remove_all:
-                TrackedCoin.deleteAll(TrackedCoin.class);
+                Coin.executeQuery("UPDATE coin SET is_checked = ?", "false");
                 updateUI();
                 Snackbar.make(this.mListView, R.string.delete_all_notification, Snackbar.LENGTH_SHORT).show();
                 return true;
@@ -118,43 +118,43 @@ public class MainActivity extends AppCompatActivity {
     private void updateUI() {
         mList.clear();
         mNameList.clear();
+        //todo: fix this with the new api
         new GetCoinsJSON().execute("https://api.coinmarketcap.com/v1/ticker/?convert=EUR");
         mAdapter = new ListAdapter(getApplicationContext(), mList, LayoutInflater.from(getApplicationContext()));
         mListView.setAdapter(mAdapter);
         mAdapter.notifyDataSetChanged();
     }
 
-    private List<String> getTrackedCoinNameList() {
-        List<TrackedCoin> trackedCoinList = TrackedCoin.listAll(TrackedCoin.class);
-        List<String> trackedCoinNameList = new ArrayList<>(trackedCoinList.size());
-        for (TrackedCoin trackedCoin : trackedCoinList) {
-            trackedCoinNameList.add(trackedCoin != null ? trackedCoin.getName() : null);
-        }
-        return trackedCoinNameList;
-    }
+//    private List<String> getTrackedCoinNameList() {
+//        List<TrackedCoin> trackedCoinList = TrackedCoin.listAll(TrackedCoin.class);
+//        List<String> trackedCoinNameList = new ArrayList<>(trackedCoinList.size());
+//        for (TrackedCoin trackedCoin : trackedCoinList) {
+//            trackedCoinNameList.add(trackedCoin != null ? trackedCoin.getName() : null);
+//        }
+//        return trackedCoinNameList;
+//    }
 
     private void fillFabButton() {
-        Log.i(TAG, "Getting new JSON");
         SweetAlertDialog pDialog = new SweetAlertDialog(MainActivity.this, SweetAlertDialog.PROGRESS_TYPE);
         pDialog.getProgressHelper().setBarColor(Color.parseColor("#3F51B5"));
         pDialog.setCancelable(false);
         mSpinnerDialog = new SpinnerDialog(MainActivity.this, mNameList, MainActivity.this.getResources().getString(R.string.add_coin));
         CoinInfoGetter mCoinInfoGetter = new CoinInfoGetter(getApplicationContext(), mNameList, mSpinnerDialog, pDialog);
         mCoinInfoGetter.getAllCoins();
+        //todo: create own spinner with better search and other cool stuff like custom list view.
         mSpinnerDialog.bindOnSpinerListener(new OnSpinerItemClick() {
             @Override
             public void onClick(String item, int position) {
-                TrackedCoin newTrackedCoin = new TrackedCoin();
-                newTrackedCoin.setName(item);
-                if (!getTrackedCoinNameList().contains(newTrackedCoin.name)) {
-                    newTrackedCoin.save();
+                Coin coin = Coin.find(Coin.class, "name = ?", item).get(0);
+                if(coin.getTracked()){
+                    Snackbar.make(mListView, R.string.duplicate_coin_input, Snackbar.LENGTH_SHORT).show();
+                }else {
+                    coin.setTracked();
+                    coin.save();
                     Snackbar.make(mListView, R.string.saved_coin_to_check, Snackbar.LENGTH_SHORT).show();
                     updateUI();
-                    mAdapter.notifyDataSetChanged();
-                } else {
-                    Snackbar.make(mListView, R.string.duplicate_coin_input, Snackbar.LENGTH_SHORT).show();
-                    mAdapter.notifyDataSetChanged();
                 }
+                mAdapter.notifyDataSetChanged();
             }
         });
     }
@@ -179,40 +179,40 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-
-            List<String> coinToChecksNameList = getTrackedCoinNameList();
-
-            try {
-                JSONArray coinArray = new JSONArray(result);
-                for (int i = 0; i <= coinArray.length(); i++) {
-                    JSONObject coin = coinArray.getJSONObject(i);
-                    if (coinToChecksNameList.contains(coin.getString("name"))) {
-                        CryptoCoin cryptoCoin = new CryptoCoin();
-                        cryptoCoin.setId(coin.getString("id"));
-                        cryptoCoin.setName(coin.getString("name"));
-                        cryptoCoin.setSymbol(coin.getString("symbol"));
-                        try {
-                            cryptoCoin.setPercent_change_24h(Double.parseDouble(coin.getString("percent_change_24h")));
-                        } catch (NumberFormatException e) {
-                            cryptoCoin.setPercent_change_24h(0.0);
-                        }
-                        try {
-                            cryptoCoin.setPrice_usd(Double.parseDouble(coin.getString("price_usd")));
-                        } catch (NumberFormatException e) {
-                            cryptoCoin.setPrice_usd(0.0);
-                        }
-                        try {
-                            cryptoCoin.setPrice_eur(Double.parseDouble(coin.getString("price_eur")));
-                        } catch (NumberFormatException e) {
-                            cryptoCoin.setPrice_eur(0.0);
-                        }
-                        mList.add(cryptoCoin);
-                        mAdapter.notifyDataSetChanged();
-                    }
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+//
+//            List<String> coinToChecksNameList = getTrackedCoinNameList();
+//
+//            try {
+//                JSONArray coinArray = new JSONArray(result);
+//                for (int i = 0; i <= coinArray.length(); i++) {
+//                    JSONObject coin = coinArray.getJSONObject(i);
+//                    if (coinToChecksNameList.contains(coin.getString("name"))) {
+//                        CryptoCoin cryptoCoin = new CryptoCoin();
+//                        cryptoCoin.setId(coin.getString("id"));
+//                        cryptoCoin.setName(coin.getString("name"));
+//                        cryptoCoin.setSymbol(coin.getString("symbol"));
+//                        try {
+//                            cryptoCoin.setPercent_change_24h(Double.parseDouble(coin.getString("percent_change_24h")));
+//                        } catch (NumberFormatException e) {
+//                            cryptoCoin.setPercent_change_24h(0.0);
+//                        }
+//                        try {
+//                            cryptoCoin.setPrice_usd(Double.parseDouble(coin.getString("price_usd")));
+//                        } catch (NumberFormatException e) {
+//                            cryptoCoin.setPrice_usd(0.0);
+//                        }
+//                        try {
+//                            cryptoCoin.setPrice_eur(Double.parseDouble(coin.getString("price_eur")));
+//                        } catch (NumberFormatException e) {
+//                            cryptoCoin.setPrice_eur(0.0);
+//                        }
+//                        mList.add(cryptoCoin);
+//                        mAdapter.notifyDataSetChanged();
+//                    }
+//                }
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
         }
     }
 
