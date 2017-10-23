@@ -8,16 +8,11 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,7 +27,6 @@ import nl.yzaazy.coinchecker.Adapter.ListAdapter;
 import nl.yzaazy.coinchecker.Helpers.CoinInfoGetter;
 import nl.yzaazy.coinchecker.Helpers.SettingsHelper;
 import nl.yzaazy.coinchecker.Objects.Coin;
-
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -146,9 +140,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(String item, int position) {
                 Coin coin = Coin.find(Coin.class, "name = ?", item).get(0);
-                if(coin.getTracked()){
+                if (coin.getTracked()) {
                     Snackbar.make(mListView, R.string.duplicate_coin_input, Snackbar.LENGTH_SHORT).show();
-                }else {
+                } else {
                     coin.setTracked();
                     coin.save();
                     Snackbar.make(mListView, R.string.saved_coin_to_check, Snackbar.LENGTH_SHORT).show();

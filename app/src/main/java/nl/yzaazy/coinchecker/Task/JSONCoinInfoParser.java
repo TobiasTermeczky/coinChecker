@@ -14,7 +14,6 @@ import java.util.List;
 import nl.yzaazy.coinchecker.Helpers.SettingsHelper;
 import nl.yzaazy.coinchecker.Interface.OnTaskCompleted;
 import nl.yzaazy.coinchecker.Objects.Coin;
-import nl.yzaazy.coinchecker.Objects.CryptoCoin;
 
 public class JSONCoinInfoParser extends AsyncTask<JSONObject, Integer, ArrayList<String>> {
     private String TAG = getClass().getName();
@@ -37,7 +36,7 @@ public class JSONCoinInfoParser extends AsyncTask<JSONObject, Integer, ArrayList
                     JSONObject coinData = data.getJSONObject(temp.next());
                     Coin coin = new Coin();
                     List<Coin> storedCoin = Coin.find(Coin.class, "symbol = ?", coinData.getString("Symbol"));
-                    if (!storedCoin.isEmpty()){
+                    if (!storedCoin.isEmpty()) {
                         coin = storedCoin.get(0);
                     }
                     coin.setSymbol(coinData.getString("Symbol"));

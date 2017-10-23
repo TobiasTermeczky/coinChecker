@@ -13,7 +13,7 @@ public class DatabaseCoinInfoGetter extends AsyncTask<String, Integer, ArrayList
     ArrayList<String> mNameList = new ArrayList<>();
     private OnTaskCompleted mListener;
 
-    public DatabaseCoinInfoGetter(OnTaskCompleted mListener){
+    public DatabaseCoinInfoGetter(OnTaskCompleted mListener) {
         this.mListener = mListener;
     }
 
