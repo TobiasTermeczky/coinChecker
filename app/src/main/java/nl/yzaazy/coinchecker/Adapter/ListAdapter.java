@@ -1,6 +1,7 @@
 package nl.yzaazy.coinchecker.Adapter;
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
@@ -50,7 +51,7 @@ public class ListAdapter extends BaseAdapter {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        ViewHolder viewHolder;
+        final ViewHolder viewHolder;
         if (convertView == null) {
             convertView = mInflater.inflate(R.layout.coin_row, parent, false);
             viewHolder = new ViewHolder();
@@ -119,15 +120,23 @@ public class ListAdapter extends BaseAdapter {
             viewHolder.icon.setAlpha(1f);
         }
 
+        if(coin.getLocked()){
+            viewHolder.button.setImageBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_lock_closed_dark));
+        }
+
         viewHolder.button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Coin coin = mList.get(position);
-                //todo: make a try catch here to check if coin is deleted correctly
-                coin.removeIsChecked(context);
-                coin.save();
-                mList.remove(position);
-                Snackbar.make(v, R.string.action_remove, Snackbar.LENGTH_SHORT).show();
+                if(coin.getLocked()){
+                    coin.setLocked(false);
+                    viewHolder.button.setImageBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_lock_open_dark));
+                    Snackbar.make(v, context.getString(R.string.unlocked, coin.getNameSymbol()), Snackbar.LENGTH_SHORT).show();
+                }else {
+                    coin.setLocked(true);
+                    viewHolder.button.setImageBitmap(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_lock_closed_dark));
+                    Snackbar.make(v, context.getString(R.string.locked, coin.getNameSymbol()), Snackbar.LENGTH_SHORT).show();
+                }
                 notifyDataSetChanged();
             }
         });

@@ -40,7 +40,8 @@
         android:alpha="0.3"
         android:background="@android:color/transparent"
         android:contentDescription="@string/clear_icon"
-        android:src="@drawable/ic_clear"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_lock_open_dark"
         android:text="@string/remove"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

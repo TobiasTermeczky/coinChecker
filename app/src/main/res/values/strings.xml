@@ -16,7 +16,7 @@
     <string name="saved_coin_to_check">Saved coin to check</string>
     <string name="action_remove_all">Remove all coins</string>
     <string name="action_remove">Removed coin form list</string>
-    <string name="delete_all_notification">All set coin checker are removed</string>
+
     <string name="duplicate_coin_input">The coin is already added</string>
     <string name="action_refresh">Refresh</string>
     <string name="icon">icon</string>
@@ -43,5 +43,18 @@
     <string name="switch_currency_euro">Switched currency to euros</string>
     <string name="action_switch_currency_dollar">Switch to dollars</string>
     <string name="switch_currency_dollar">Switched currency to dollars</string>
+
+    <string name="delete_all_notification">All unlocked coin checkers are removed</string>
+    <string name="remove_all_question">Are you sure?</string>
+    <string name="remove_all_info">This action will remove all coins from being checked!</string>
+
+    <string name="yes">Yes</string>
+
+    <string name="locked">%1$s is locked</string>
+    <string name="unlocked">%1$s is unlocked</string>
+    <string name="lock_all">Lock all</string>
+    <string name="unlock_all">Unlock all</string>
+    <string name="all_coins_locked">All coins are now locked</string>
+    <string name="all_coins_unlocked">All coins are now unlocked</string>
 
 </resources>

@@ -1,10 +1,12 @@
 package nl.yzaazy.coinchecker;
 
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -26,6 +28,7 @@ import nl.yzaazy.coinchecker.Adapter.ListAdapter;
 import nl.yzaazy.coinchecker.Helpers.CoinsDataGetter;
 import nl.yzaazy.coinchecker.Helpers.CoinsGetter;
 import nl.yzaazy.coinchecker.Helpers.SettingsHelper;
+import nl.yzaazy.coinchecker.Helpers.SwipeDismissListViewtouchListener;
 import nl.yzaazy.coinchecker.Interface.RefreshInterface;
 import nl.yzaazy.coinchecker.Objects.Coin;
 
@@ -37,7 +40,6 @@ public class MainActivity extends AppCompatActivity implements RefreshInterface 
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ListView mListView;
     private ListAdapter mAdapter;
-    private Menu menu;
 
 
     @Override
@@ -48,8 +50,23 @@ public class MainActivity extends AppCompatActivity implements RefreshInterface 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         mListView = findViewById(R.id.lvCoins);
+        mListView.setOnTouchListener(new SwipeDismissListViewtouchListener(mListView,
+                new SwipeDismissListViewtouchListener.DismissCallbacks() {
+                    @Override
+                    public boolean canDismiss(int position) {
+                        return !mCoinList.get(position).getLocked();
+                    }
 
-
+                    @Override
+                    public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+                        for (int position : reverseSortedPositions) {
+                            mCoinList.get(position).removeIsChecked(getApplicationContext());
+                            mCoinList.remove(position);
+                            mAdapter.notifyDataSetChanged();
+                            Snackbar.make(mListView, R.string.action_remove, Snackbar.LENGTH_SHORT).show();
+                        }
+                    }
+                }));
         mCoinList = Coin.find(Coin.class, "is_checked = ?", "1");
         mAdapter = new ListAdapter(getApplicationContext(), mCoinList, LayoutInflater.from(getApplicationContext()));
         mListView.setAdapter(mAdapter);
@@ -80,7 +97,6 @@ public class MainActivity extends AppCompatActivity implements RefreshInterface 
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        this.menu = menu;
         return true;
     }
 
@@ -93,16 +109,34 @@ public class MainActivity extends AppCompatActivity implements RefreshInterface 
         //noinspection SimplifiableIfStatement
         switch (id) {
             case R.id.action_remove_all:
-                mCoinList = Coin.find(Coin.class, "is_checked = ?", "1");
-                for(Coin coin : mCoinList) {
-                    coin.removeIsChecked(getApplicationContext());
-                }
-                refresh();
-                Snackbar.make(this.mListView, R.string.delete_all_notification, Snackbar.LENGTH_SHORT).show();
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setCancelable(true);
+                builder.setTitle(R.string.remove_all_question);
+                builder.setMessage(R.string.remove_all_info);
+                builder.setNegativeButton(R.string.cancel_option, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.cancel();
+                    }
+                });
+                builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        mCoinList = Coin.find(Coin.class, "is_checked = ?", "1");
+                        for (Coin coin : mCoinList) {
+                            if(!coin.getLocked()) {
+                                coin.removeIsChecked(getApplicationContext());
+                            }
+                        }
+                        refresh();
+                        Snackbar.make(mListView, R.string.delete_all_notification, Snackbar.LENGTH_SHORT).show();
+                    }
+                });
+                builder.show();
                 break;
             case R.id.switch_currency:
                 mSettingsHelper.switchCurrency();
-                switch (mSettingsHelper.getCurrency()){
+                switch (mSettingsHelper.getCurrency()) {
                     case "dollar":
                         item.setTitle(R.string.action_switch_currency_dollar);
                         item.setIcon(R.drawable.ic_dollar);
@@ -123,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements RefreshInterface 
                 break;
             case R.id.order:
                 mSettingsHelper.switchOrder();
-                switch (mSettingsHelper.getSortOrder()){
+                switch (mSettingsHelper.getSortOrder()) {
                     case "index":
                         item.setTitle(R.string.action_order_descending);
                         item.setIcon(R.drawable.ic_index);
@@ -140,6 +174,20 @@ public class MainActivity extends AppCompatActivity implements RefreshInterface 
                         Snackbar.make(this.mListView, R.string.order_ascending, Snackbar.LENGTH_SHORT).show();
                         break;
                 }
+                refresh();
+                break;
+            case R.id.action_lock_all:
+                for (Coin coin : mCoinList){
+                    coin.setLocked(true);
+                }
+                Snackbar.make(this.mListView, R.string.all_coins_locked, Snackbar.LENGTH_SHORT).show();
+                refresh();
+                break;
+            case R.id.action_unlock_all:
+                for (Coin coin : mCoinList){
+                    coin.setLocked(false);
+                }
+                Snackbar.make(this.mListView, R.string.all_coins_unlocked, Snackbar.LENGTH_SHORT).show();
                 refresh();
                 break;
         }

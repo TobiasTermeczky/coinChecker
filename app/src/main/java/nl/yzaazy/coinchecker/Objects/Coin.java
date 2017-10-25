@@ -31,6 +31,16 @@ public class Coin extends SugarRecord<Coin> implements Comparable<Coin> {
     String percentChangeUsd24h;
     String percentChangeEur24h;
     int sortOrder;
+    Boolean locked = false;
+
+    public Boolean getLocked() {
+        return locked;
+    }
+
+    public void setLocked(Boolean locked) {
+        this.locked = locked;
+        save();
+    }
 
     public int getSortOrder() {
         return sortOrder;
