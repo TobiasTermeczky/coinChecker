@@ -4,23 +4,23 @@
     tools:context="nl.yzaazy.coinchecker.MainActivity">
 
     <item
-        android:id="@+id/action_refresh"
-        android:icon="@drawable/ic_refresh"
-        android:orderInCategory="1"
-        android:title="@string/action_refresh"
+        android:id="@+id/switch_currency"
+        android:icon="@drawable/ic_dollar"
+        android:orderInCategory="2"
+        android:title="@string/action_switch_currency_euro"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/order"
+        android:icon="@drawable/ic_index"
+        android:orderInCategory="3"
+        android:title="@string/action_order_descending"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_remove_all"
-        android:orderInCategory="2"
+        android:orderInCategory="6"
         android:title="@string/action_remove_all" />
     <item
-        android:id="@+id/switch_currency"
-        android:orderInCategory="3"
-        android:title="@string/action_switch_currency" />
-    <item
         android:id="@+id/force_database"
-        android:orderInCategory="4"
+        android:orderInCategory="7"
         android:title="@string/action_force_database" />
-
-
 </menu>

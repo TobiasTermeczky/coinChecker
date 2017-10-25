@@ -1,18 +1,44 @@
 package nl.yzaazy.coinchecker.Objects;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
+import android.util.Log;
+import android.widget.ImageView;
+
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageRequest;
+import com.android.volley.toolbox.Volley;
 import com.orm.SugarRecord;
 
-public class Coin extends SugarRecord<Coin> {
+import java.util.Objects;
+
+import nl.yzaazy.coinchecker.Helpers.ImageSaver;
+import nl.yzaazy.coinchecker.Helpers.SettingsHelper;
+import nl.yzaazy.coinchecker.Interface.RefreshInterface;
+
+public class Coin extends SugarRecord<Coin> implements Comparable<Coin> {
 
     String Symbol;
     String Name;
     String NameSymbol;
     String IconUrl;
-    String IconLocal;
     Boolean IsChecked = false;
-    Double priceUsd;
-    Double priceEur;
-    Double percentChange24h;
+    String priceUsd;
+    String priceEur;
+    String percentChangeUsd24h;
+    String percentChangeEur24h;
+    int sortOrder;
+
+    public int getSortOrder() {
+        return sortOrder;
+    }
+
+    public void setSortOrder(int sortOrder) {
+        this.sortOrder = sortOrder;
+    }
 
     public String getSymbol() {
         return Symbol;
@@ -46,48 +72,78 @@ public class Coin extends SugarRecord<Coin> {
         IconUrl = iconUrl;
     }
 
-    public String getIconLocal() {
-        return IconLocal;
+    public Bitmap getIconLocal(final Context context) {
+        return new ImageSaver(context).
+                setFileName(getSymbol()).
+                setDirectoryName("icons").
+                load();
     }
 
-    public void setIconLocal(String iconLocal) {
-        IconLocal = iconLocal;
-    }
-
-    public Boolean getTracked() {
+    public Boolean getIsChecked() {
         return IsChecked;
     }
 
-    public void setTracked() {
+    public void setIsChecked(final Context context, final RefreshInterface refreshInterface) {
         IsChecked = true;
+        RequestQueue queue = Volley.newRequestQueue(context);
+        ImageRequest imageRequest = new ImageRequest(
+                this.getIconUrl(),
+                new Response.Listener<Bitmap>() {
+                    @Override
+                    public void onResponse(Bitmap response) {
+                        new ImageSaver(context).setFileName(getSymbol()).setDirectoryName("icons").save(response);
+                        refreshInterface.refresh();
+                    }
+                },
+                0,
+                0,
+                ImageView.ScaleType.CENTER,
+                Bitmap.Config.RGB_565, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("Coin", "Could not get image");
+            }
+        });
+        queue.add(imageRequest);
+        save();
     }
 
-    public void removeTracked() {
+    public void removeIsChecked(final Context context) {
         IsChecked = false;
+        Boolean ding = new ImageSaver(context).setFileName(getSymbol()).setDirectoryName("icons").deleteFile();
+        save();
     }
 
-    public Double getPriceUsd() {
+    public String getPriceUsd() {
         return priceUsd;
     }
 
-    public void setPriceUsd(Double priceUsd) {
+    public void setPriceUsd(String priceUsd) {
         this.priceUsd = priceUsd;
     }
 
-    public Double getPriceEur() {
+    public String getPriceEur() {
         return priceEur;
     }
 
-    public void setPriceEur(Double priceEur) {
+    public void setPriceEur(String priceEur) {
         this.priceEur = priceEur;
     }
 
-    public Double getPercentChange24h() {
-        return percentChange24h;
+    public String getPercentChangeUsd24h() {
+        return percentChangeUsd24h;
     }
 
-    public void setPercentChange24h(Double percentChange24h) {
-        this.percentChange24h = percentChange24h;
+    public void setPercentChangeUsd24h(String percentChangeUsd24h) {
+        this.percentChangeUsd24h = percentChangeUsd24h;
+    }
+
+    public String getPercentChangeEur24h() {
+        return percentChangeEur24h;
+    }
+
+    public void setPercentChangeEur24h(String percentChangeEur24h) {
+        this.percentChangeEur24h = percentChangeEur24h;
     }
 
     @Override
@@ -97,11 +153,25 @@ public class Coin extends SugarRecord<Coin> {
                 ", Name='" + Name + '\'' +
                 ", NameSymbol='" + NameSymbol + '\'' +
                 ", IconUrl='" + IconUrl + '\'' +
-                ", IconLocal='" + IconLocal + '\'' +
                 ", IsChecked=" + IsChecked +
                 ", priceUsd=" + priceUsd +
                 ", priceEur=" + priceEur +
-                ", percentChange24h=" + percentChange24h +
+                ", percentChangeUsd24h=" + percentChangeUsd24h +
+                ", percentChangeEur24h=" + percentChangeEur24h +
                 '}';
+    }
+
+    @Override
+    public int compareTo(@NonNull Coin coin) {
+        if (coin.getPercentChangeUsd24h() != null & percentChangeUsd24h != null) {
+            if (Objects.equals(new SettingsHelper().getSortOrder(), "descending")) {
+                return Double.parseDouble(percentChangeUsd24h) > Double.parseDouble(coin.getPercentChangeUsd24h()) ? -1 : Double.parseDouble(percentChangeUsd24h) < Double.parseDouble(coin.getPercentChangeUsd24h()) ? 1 : 0;
+            }else if (Objects.equals(new SettingsHelper().getSortOrder(), "ascending")){
+                return Double.parseDouble(percentChangeUsd24h) < Double.parseDouble(coin.getPercentChangeUsd24h()) ? -1 : Double.parseDouble(percentChangeUsd24h) > Double.parseDouble(coin.getPercentChangeUsd24h()) ? 1 : 0;
+            }else {
+                return sortOrder < coin.getSortOrder() ? -1 : sortOrder > coin.getSortOrder() ? 1 : 0;
+            }
+        }
+        return 0;
     }
 }

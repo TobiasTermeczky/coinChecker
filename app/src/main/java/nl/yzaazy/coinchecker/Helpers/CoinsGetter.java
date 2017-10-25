@@ -4,7 +4,6 @@ package nl.yzaazy.coinchecker.Helpers;
 import android.content.Context;
 import android.util.Log;
 
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -20,12 +19,12 @@ import java.util.Date;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 import in.galaxyofandroid.spinerdialog.SpinnerDialog;
-import nl.yzaazy.coinchecker.Interface.OnTaskCompleted;
+import nl.yzaazy.coinchecker.Interface.CoinGetterInterface;
 import nl.yzaazy.coinchecker.R;
-import nl.yzaazy.coinchecker.Task.DatabaseCoinInfoGetter;
-import nl.yzaazy.coinchecker.Task.JSONCoinInfoParser;
+import nl.yzaazy.coinchecker.Task.DatabaseCoinGetter;
+import nl.yzaazy.coinchecker.Task.JSONCoinParser;
 
-public class CoinInfoGetter implements OnTaskCompleted {
+public class CoinsGetter implements CoinGetterInterface {
     SettingsHelper settingsHelper = new SettingsHelper();
     String TAG = getClass().getName();
     Context mContext;
@@ -33,7 +32,7 @@ public class CoinInfoGetter implements OnTaskCompleted {
     SpinnerDialog mSpinnerDialog;
     SweetAlertDialog mPDialog;
 
-    public CoinInfoGetter(Context context, ArrayList<String> mNameList, SpinnerDialog spinnerDialog, SweetAlertDialog pDialog) {
+    public CoinsGetter(Context context, ArrayList<String> mNameList, SpinnerDialog spinnerDialog, SweetAlertDialog pDialog) {
         this.mContext = context;
         this.mNameList = mNameList;
         this.mSpinnerDialog = spinnerDialog;
@@ -41,7 +40,7 @@ public class CoinInfoGetter implements OnTaskCompleted {
     }
 
     @Override
-    public void coinInfoGetterCallback(ArrayList<String> NameList) {
+    public void coinGetterCallback(ArrayList<String> NameList) {
         updateUI(NameList);
     }
 
@@ -62,19 +61,23 @@ public class CoinInfoGetter implements OnTaskCompleted {
             mPDialog.setTitleText(mContext.getString(R.string.coin_internet));
             mPDialog.show();
             RequestQueue queue = Volley.newRequestQueue(mContext);
-            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                    (Request.Method.GET, "https://www.cryptocompare.com/api/data/coinlist/", null, new Response.Listener<JSONObject>() {
+            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+                    Request.Method.GET,
+                    "https://www.cryptocompare.com/api/data/coinlist/",
+                    null,
+                    new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
-                            new JSONCoinInfoParser(CoinInfoGetter.this).execute(response);
+                            new JSONCoinParser(CoinsGetter.this).execute(response);
                         }
-                    }, new Response.ErrorListener() {
+                    },
+                    new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
                             mPDialog.cancel();
                             mPDialog.setTitleText(mContext.getString(R.string.coin_database_no_internet));
                             mPDialog.show();
-                            new DatabaseCoinInfoGetter(CoinInfoGetter.this).execute();
+                            new DatabaseCoinGetter(CoinsGetter.this).execute();
                         }
                     });
             jsonObjectRequest.setShouldCache(false);
@@ -82,7 +85,7 @@ public class CoinInfoGetter implements OnTaskCompleted {
         } else {
             mPDialog.setTitleText(mContext.getString(R.string.coin_database));
             mPDialog.show();
-            new DatabaseCoinInfoGetter(this).execute();
+            new DatabaseCoinGetter(this).execute();
         }
     }
 

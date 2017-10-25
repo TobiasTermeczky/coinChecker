@@ -72,18 +72,51 @@ public class ListAdapter extends BaseAdapter {
         //Money per coin
         DecimalFormat df = new DecimalFormat("0", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
         df.setMaximumFractionDigits(340); //340 = DecimalFormat.DOUBLE_FRACTION_DIGITS
+
         if(Objects.equals(settingsHelper.getCurrency(), "euro")) {
-            viewHolder.price.setText(context.getString(R.string.euro, df.format(coin.getPriceEur())));
+            if(coin.getPriceEur() == null){
+                viewHolder.price.setText(R.string.no_price);
+            }else {
+                viewHolder.price.setText(coin.getPriceEur());
+            }
         }else {
-            viewHolder.price.setText(context.getString(R.string.dollar, df.format(coin.getPriceUsd())));
+            if(coin.getPriceUsd() == null){
+                viewHolder.price.setText(R.string.no_price);
+            }else {
+                viewHolder.price.setText(coin.getPriceUsd());
+            }
         }
 
         //percent
-        viewHolder.percent.setText(String.valueOf(coin.getPercentChange24h() + "%"));
-        if(coin.getPercentChange24h() > 0){
-            viewHolder.percent.setTextColor(Color.parseColor("#006400"));
-        }else if(coin.getPercentChange24h() < 0){
-            viewHolder.percent.setTextColor(Color.RED);
+        if(Objects.equals(settingsHelper.getCurrency(), "euro")) {
+            if(coin.getPercentChangeUsd24h() == null) {
+                viewHolder.percent.setText(R.string.no_data);
+            } else {
+                viewHolder.percent.setText(coin.getPercentChangeEur24h() + "%");
+                //setting the write color
+                if (Double.parseDouble(coin.getPercentChangeEur24h()) > 0) {
+                    viewHolder.percent.setTextColor(Color.parseColor("#006400"));
+                } else if (Double.parseDouble(coin.getPercentChangeEur24h()) < 0) {
+                    viewHolder.percent.setTextColor(Color.RED);
+                }
+            }
+        }else {
+            if(coin.getPercentChangeUsd24h() == null){
+                viewHolder.percent.setText(R.string.no_data);
+            }else {
+                viewHolder.percent.setText(String.valueOf(coin.getPercentChangeUsd24h() + "%"));
+                if (Double.parseDouble(coin.getPercentChangeUsd24h()) > 0) {
+                    viewHolder.percent.setTextColor(Color.parseColor("#006400"));
+                } else if (Double.parseDouble(coin.getPercentChangeUsd24h()) < 0) {
+                    viewHolder.percent.setTextColor(Color.RED);
+                }
+            }
+        }
+
+
+        if(coin.getIconLocal(context) != null){
+            viewHolder.icon.setImageBitmap(coin.getIconLocal(context));
+            viewHolder.icon.setAlpha(1f);
         }
 
         viewHolder.button.setOnClickListener(new View.OnClickListener() {
@@ -91,7 +124,7 @@ public class ListAdapter extends BaseAdapter {
             public void onClick(View v) {
                 Coin coin = mList.get(position);
                 //todo: make a try catch here to check if coin is deleted correctly
-                coin.removeTracked();
+                coin.removeIsChecked(context);
                 coin.save();
                 mList.remove(position);
                 Snackbar.make(v, R.string.action_remove, Snackbar.LENGTH_SHORT).show();

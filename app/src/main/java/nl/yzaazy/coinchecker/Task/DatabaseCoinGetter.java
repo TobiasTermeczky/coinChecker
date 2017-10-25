@@ -5,15 +5,15 @@ import android.os.AsyncTask;
 import java.util.ArrayList;
 import java.util.List;
 
-import nl.yzaazy.coinchecker.Interface.OnTaskCompleted;
+import nl.yzaazy.coinchecker.Interface.CoinGetterInterface;
 import nl.yzaazy.coinchecker.Objects.Coin;
 
 
-public class DatabaseCoinInfoGetter extends AsyncTask<String, Integer, ArrayList<String>> {
+public class DatabaseCoinGetter extends AsyncTask<String, Integer, ArrayList<String>> {
     ArrayList<String> mNameList = new ArrayList<>();
-    private OnTaskCompleted mListener;
+    private CoinGetterInterface mListener;
 
-    public DatabaseCoinInfoGetter(OnTaskCompleted mListener) {
+    public DatabaseCoinGetter(CoinGetterInterface mListener) {
         this.mListener = mListener;
     }
 
@@ -28,6 +28,6 @@ public class DatabaseCoinInfoGetter extends AsyncTask<String, Integer, ArrayList
 
     @Override
     protected void onPostExecute(ArrayList<String> mNameList) {
-        mListener.coinInfoGetterCallback(mNameList);
+        mListener.coinGetterCallback(mNameList);
     }
 }

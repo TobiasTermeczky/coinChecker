@@ -2,7 +2,7 @@ package nl.yzaazy.coinchecker.Objects;
 
 import com.orm.SugarRecord;
 
-public class Settings extends SugarRecord<Settings> {
+public class Setting extends SugarRecord<Setting> {
 
     private String setting;
     private String value;

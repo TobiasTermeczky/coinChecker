@@ -12,16 +12,16 @@ import java.util.Iterator;
 import java.util.List;
 
 import nl.yzaazy.coinchecker.Helpers.SettingsHelper;
-import nl.yzaazy.coinchecker.Interface.OnTaskCompleted;
+import nl.yzaazy.coinchecker.Interface.CoinGetterInterface;
 import nl.yzaazy.coinchecker.Objects.Coin;
 
-public class JSONCoinInfoParser extends AsyncTask<JSONObject, Integer, ArrayList<String>> {
+public class JSONCoinParser extends AsyncTask<JSONObject, Integer, ArrayList<String>> {
     private String TAG = getClass().getName();
     private SettingsHelper settingsHelper = new SettingsHelper();
     private ArrayList<String> mNameList = new ArrayList<>();
-    private OnTaskCompleted mListener;
+    private CoinGetterInterface mListener;
 
-    public JSONCoinInfoParser(OnTaskCompleted mListener) {
+    public JSONCoinParser(CoinGetterInterface mListener) {
         this.mListener = mListener;
     }
 
@@ -42,6 +42,7 @@ public class JSONCoinInfoParser extends AsyncTask<JSONObject, Integer, ArrayList
                     coin.setSymbol(coinData.getString("Symbol"));
                     coin.setName(coinData.getString("CoinName"));
                     coin.setNameSymbol(coinData.getString("FullName"));
+                    coin.setSortOrder(coinData.getInt("SortOrder"));
                     try {
                         coin.setIconUrl(response.getString("BaseImageUrl") + coinData.getString("ImageUrl"));
                     } catch (JSONException e) {
@@ -64,7 +65,7 @@ public class JSONCoinInfoParser extends AsyncTask<JSONObject, Integer, ArrayList
 
     @Override
     protected void onPostExecute(ArrayList<String> mNameList) {
-        mListener.coinInfoGetterCallback(mNameList);
+        mListener.coinGetterCallback(mNameList);
 
     }
 }
