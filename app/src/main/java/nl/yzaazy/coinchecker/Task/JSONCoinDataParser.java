@@ -45,6 +45,14 @@ public class JSONCoinDataParser extends AsyncTask<JSONObject, Integer, Boolean> 
                 } catch (JSONException e) {
                     Log.w(TAG, "Can't get price EUR");
                 }
+
+                try {
+                    JSONObject coinDataBtc = coinData.getJSONObject("BTC");
+                    coin.setPriceBtc(coinDataBtc.getString("PRICE"));
+                    coin.setPercentChangeBtc24h(coinDataBtc.getString("CHANGEPCT24HOUR"));
+                } catch (JSONException e) {
+                    Log.w(TAG, "Can't get price BTC");
+                }
                 coin.save();
             }
         } catch (JSONException e) {

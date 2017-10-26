@@ -56,10 +56,17 @@ public class SettingsHelper {
 
     public void switchCurrency() {
         Setting setting = Setting.find(Setting.class, "setting = ?", "Currency").get(0);
-        if (Objects.equals(setting.getValue(), "dollar")) {
-            setting.setValue("euro");
-        } else {
-            setting.setValue("dollar");
+        switch (setting.getValue()){
+            case "dollar":
+                setting.setValue("euro");
+                break;
+            case "euro":
+                setting.setValue("btc");
+                break;
+            case "btc":
+                setting.setValue("dollar");
+                break;
+
         }
         setting.save();
     }
@@ -71,12 +78,16 @@ public class SettingsHelper {
 
     public void switchOrder() {
         Setting setting = Setting.find(Setting.class, "setting = ?", "SortOrder").get(0);
-        if (Objects.equals(setting.getValue(), "index")) {
-            setting.setValue("descending");
-        } else if (Objects.equals(setting.getValue(), "descending")){
-            setting.setValue("ascending");
-        } else {
-            setting.setValue("index");
+        switch (setting.getValue()){
+            case "index":
+                setting.setValue("descending");
+                break;
+            case "descending":
+                setting.setValue("ascending");
+                break;
+            default:
+                setting.setValue("index");
+                break;
         }
         setting.save();
     }

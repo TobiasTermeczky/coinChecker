@@ -110,9 +110,12 @@ public class MainActivity extends AppCompatActivity implements RefreshInterface 
                 item.setIcon(R.drawable.ic_dollar);
                 break;
             case "euro":
-                item.setTitle(R.string.action_switch_currency_dollar);
+                item.setTitle(R.string.action_switch_currency_bitcoins);
                 item.setIcon(R.drawable.ic_euro);
                 break;
+            case "btc":
+                item.setTitle(R.string.action_switch_currency_dollar);
+                item.setIcon(R.drawable.ic_bitcoin);
         }
         item = menu.getItem(1);
         switch (mSettingsHelper.getSortOrder()) {
@@ -173,13 +176,16 @@ public class MainActivity extends AppCompatActivity implements RefreshInterface 
                         item.setTitle(R.string.action_switch_currency_euro);
                         item.setIcon(R.drawable.ic_dollar);
                         Snackbar.make(this.mListView, R.string.switch_currency_dollar, Snackbar.LENGTH_SHORT).show();
-
                         break;
                     case "euro":
-                        item.setTitle(R.string.action_switch_currency_dollar);
+                        item.setTitle(R.string.action_switch_currency_bitcoins);
                         item.setIcon(R.drawable.ic_euro);
                         Snackbar.make(this.mListView, R.string.switch_currency_euro, Snackbar.LENGTH_SHORT).show();
                         break;
+                    case "btc":
+                        item.setTitle(R.string.action_switch_currency_dollar);
+                        item.setIcon(R.drawable.ic_bitcoin);
+                        Snackbar.make(this.mListView, R.string.switch_currency_bitcoins, Snackbar.LENGTH_SHORT).show();
                 }
                 refresh();
                 break;

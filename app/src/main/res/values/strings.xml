@@ -43,6 +43,8 @@
     <string name="switch_currency_euro">Switched currency to euros</string>
     <string name="action_switch_currency_dollar">Switch to dollars</string>
     <string name="switch_currency_dollar">Switched currency to dollars</string>
+    <string name="action_switch_currency_bitcoins">Switch to bitcoins</string>
+    <string name="switch_currency_bitcoins">Switched currency to bitcoins</string>
 
     <string name="delete_all_notification">All unlocked coin checkers are removed</string>
     <string name="remove_all_question">Are you sure?</string>
@@ -63,5 +65,6 @@
     <string name="no_internet">No internet</string>
     <string name="delete_all_icons">Delete all icons</string>
     <string name="icon_remove_all">All small icons are removed</string>
+
 
 </resources>

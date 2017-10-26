@@ -38,7 +38,7 @@ public class CoinsDataGetter{
         for(Coin coin : mCoinList){
             url = url + coin.getSymbol() + ",";
         }
-        url = url + "&tsyms=USD,EUR";
+        url = url + "&tsyms=USD,EUR,BTC";
         Log.i(TAG, url);
 
         RequestQueue queue = Volley.newRequestQueue(mContext);

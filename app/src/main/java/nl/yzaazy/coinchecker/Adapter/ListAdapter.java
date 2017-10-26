@@ -74,46 +74,41 @@ public class ListAdapter extends BaseAdapter {
         DecimalFormat df = new DecimalFormat("0", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
         df.setMaximumFractionDigits(340); //340 = DecimalFormat.DOUBLE_FRACTION_DIGITS
 
-        if(Objects.equals(settingsHelper.getCurrency(), "euro")) {
-            if(coin.getPriceEur() == null){
-                viewHolder.price.setText(R.string.no_price);
-            }else {
-                viewHolder.price.setText(coin.getPriceEur());
-            }
-        }else {
-            if(coin.getPriceUsd() == null){
-                viewHolder.price.setText(R.string.no_price);
-            }else {
-                viewHolder.price.setText(coin.getPriceUsd());
-            }
+
+        String price = null;
+        String percent = null;
+        switch (settingsHelper.getCurrency()){
+            case "euro":
+                price = coin.getPriceEur();
+                percent = coin.getPercentChangeEur24h();
+                break;
+            case "dollar":
+                price = coin.getPriceUsd();
+                percent = coin.getPercentChangeUsd24h();
+                break;
+            case "btc":
+                price = coin.getPriceBtc();
+                percent = coin.getPercentChangeBtc24h();
+                break;
         }
 
-        //percent
-        if(Objects.equals(settingsHelper.getCurrency(), "euro")) {
-            if(coin.getPercentChangeUsd24h() == null) {
-                viewHolder.percent.setText(R.string.no_data);
-            } else {
-                viewHolder.percent.setText(coin.getPercentChangeEur24h() + "%");
-                //setting the write color
-                if (Double.parseDouble(coin.getPercentChangeEur24h()) > 0) {
-                    viewHolder.percent.setTextColor(Color.parseColor("#006400"));
-                } else if (Double.parseDouble(coin.getPercentChangeEur24h()) < 0) {
-                    viewHolder.percent.setTextColor(Color.RED);
-                }
-            }
-        }else {
-            if(coin.getPercentChangeUsd24h() == null){
-                viewHolder.percent.setText(R.string.no_data);
-            }else {
-                viewHolder.percent.setText(String.valueOf(coin.getPercentChangeUsd24h() + "%"));
-                if (Double.parseDouble(coin.getPercentChangeUsd24h()) > 0) {
-                    viewHolder.percent.setTextColor(Color.parseColor("#006400"));
-                } else if (Double.parseDouble(coin.getPercentChangeUsd24h()) < 0) {
-                    viewHolder.percent.setTextColor(Color.RED);
-                }
-            }
+        if(price == null){
+            viewHolder.price.setText(R.string.no_price);
+        } else {
+            viewHolder.price.setText(price);
         }
 
+        if(percent == null) {
+            viewHolder.percent.setText(R.string.no_data);
+        } else {
+            viewHolder.percent.setText(percent + "%");
+            //setting the write color
+            if (Double.parseDouble(percent) > 0) {
+                viewHolder.percent.setTextColor(Color.parseColor("#006400"));
+            } else if (Double.parseDouble(percent) < 0) {
+                viewHolder.percent.setTextColor(Color.RED);
+            }
+        }
 
         if(coin.getIconLocal(context) != null){
             viewHolder.icon.setImageBitmap(coin.getIconLocal(context));
