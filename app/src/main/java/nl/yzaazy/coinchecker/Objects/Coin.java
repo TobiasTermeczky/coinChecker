@@ -15,11 +15,10 @@ import com.orm.SugarRecord;
 
 import java.util.Objects;
 
-import nl.yzaazy.coinchecker.Adapter.ListAdapter;
 import nl.yzaazy.coinchecker.Adapter.SpinnerAdapter;
 import nl.yzaazy.coinchecker.Helpers.ImageSaver;
-import nl.yzaazy.coinchecker.Helpers.VolleyHelper;
 import nl.yzaazy.coinchecker.Helpers.SettingsHelper;
+import nl.yzaazy.coinchecker.Helpers.VolleyHelper;
 import nl.yzaazy.coinchecker.Interface.RefreshInterface;
 
 public class Coin extends SugarRecord<Coin> implements Comparable<Coin> {
@@ -31,8 +30,10 @@ public class Coin extends SugarRecord<Coin> implements Comparable<Coin> {
     Boolean IsChecked = false;
     String priceUsd;
     String priceEur;
+    String priceBtc;
     String percentChangeUsd24h;
     String percentChangeEur24h;
+    String percentChangeBtc24h;
     int sortOrder;
     Boolean locked = false;
 
@@ -108,7 +109,7 @@ public class Coin extends SugarRecord<Coin> implements Comparable<Coin> {
                         new ImageSaver(context).setFileName(getSymbol()).setDirectoryName("small_icons").save(response);
                         adapter.notifyDataSetChanged();
                     }
-                },64,64,
+                }, 64, 64,
                 ImageView.ScaleType.CENTER,
                 Bitmap.Config.RGB_565, new Response.ErrorListener() {
             @Override
@@ -119,7 +120,7 @@ public class Coin extends SugarRecord<Coin> implements Comparable<Coin> {
         VolleyHelper.getInstance(context).addToRequestQueue(imageRequest);
     }
 
-    public void deleteSmallIconLocal(final Context context){
+    public void deleteSmallIconLocal(final Context context) {
         new ImageSaver(context).setFileName(getSymbol()).setDirectoryName("small_icons").deleteFile();
     }
 
@@ -138,7 +139,7 @@ public class Coin extends SugarRecord<Coin> implements Comparable<Coin> {
                         new ImageSaver(context).setFileName(getSymbol()).setDirectoryName("icons").save(response);
                         refreshInterface.refresh();
                     }
-                },0,0,
+                }, 0, 0,
                 ImageView.ScaleType.CENTER,
                 Bitmap.Config.RGB_565, new Response.ErrorListener() {
             @Override
@@ -172,6 +173,14 @@ public class Coin extends SugarRecord<Coin> implements Comparable<Coin> {
         this.priceEur = priceEur;
     }
 
+    public String getPriceBtc() {
+        return priceBtc;
+    }
+
+    public void setPriceBtc(String priceBtc) {
+        this.priceBtc = priceBtc;
+    }
+
     public String getPercentChangeUsd24h() {
         return percentChangeUsd24h;
     }
@@ -188,6 +197,14 @@ public class Coin extends SugarRecord<Coin> implements Comparable<Coin> {
         this.percentChangeEur24h = percentChangeEur24h;
     }
 
+    public String getPercentChangeBtc24h() {
+        return percentChangeBtc24h;
+    }
+
+    public void setPercentChangeBtc24h(String percentChangeBtc24h) {
+        this.percentChangeBtc24h = percentChangeBtc24h;
+    }
+
     @Override
     public String toString() {
         return "Coin{" +
@@ -196,21 +213,43 @@ public class Coin extends SugarRecord<Coin> implements Comparable<Coin> {
                 ", NameSymbol='" + NameSymbol + '\'' +
                 ", IconUrl='" + IconUrl + '\'' +
                 ", IsChecked=" + IsChecked +
-                ", priceUsd=" + priceUsd +
-                ", priceEur=" + priceEur +
-                ", percentChangeUsd24h=" + percentChangeUsd24h +
-                ", percentChangeEur24h=" + percentChangeEur24h +
+                ", priceUsd='" + priceUsd + '\'' +
+                ", priceEur='" + priceEur + '\'' +
+                ", priceBtc='" + priceBtc + '\'' +
+                ", percentChangeUsd24h='" + percentChangeUsd24h + '\'' +
+                ", percentChangeEur24h='" + percentChangeEur24h + '\'' +
+                ", percentChangeBtc24h='" + percentChangeBtc24h + '\'' +
+                ", sortOrder=" + sortOrder +
+                ", locked=" + locked +
                 '}';
     }
 
     @Override
     public int compareTo(@NonNull Coin coin) {
-        if (coin.getPercentChangeUsd24h() != null & percentChangeUsd24h != null) {
+        Double localValue = null;
+        Double coinValue = null;
+
+        switch (new SettingsHelper().getCurrency()){
+            case "dollar":
+                try{
+                    localValue = Double.parseDouble(percentChangeUsd24h);
+                    coinValue = Double.parseDouble(coin.getPercentChangeUsd24h());
+                }catch(Exception ignored){}
+                break;
+            case "euro":
+                try{
+                localValue = Double.parseDouble(percentChangeEur24h);
+                coinValue = Double.parseDouble(coin.getPercentChangeEur24h());
+                }catch(Exception ignored){}
+                break;
+        }
+
+        if (coinValue != null && localValue != null) {
             if (Objects.equals(new SettingsHelper().getSortOrder(), "descending")) {
-                return Double.parseDouble(percentChangeUsd24h) > Double.parseDouble(coin.getPercentChangeUsd24h()) ? -1 : Double.parseDouble(percentChangeUsd24h) < Double.parseDouble(coin.getPercentChangeUsd24h()) ? 1 : 0;
-            }else if (Objects.equals(new SettingsHelper().getSortOrder(), "ascending")){
-                return Double.parseDouble(percentChangeUsd24h) < Double.parseDouble(coin.getPercentChangeUsd24h()) ? -1 : Double.parseDouble(percentChangeUsd24h) > Double.parseDouble(coin.getPercentChangeUsd24h()) ? 1 : 0;
-            }else {
+                return localValue > coinValue ? -1 : localValue < coinValue ? 1 : 0;
+            } else if (Objects.equals(new SettingsHelper().getSortOrder(), "ascending")) {
+                return localValue < coinValue ? -1 : localValue > coinValue ? 1 : 0;
+            } else {
                 return sortOrder < coin.getSortOrder() ? -1 : sortOrder > coin.getSortOrder() ? 1 : 0;
             }
         }

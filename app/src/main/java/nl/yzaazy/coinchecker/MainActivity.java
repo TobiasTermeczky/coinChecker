@@ -16,9 +16,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements RefreshInterface 
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ListView mListView;
     private ListAdapter mAdapter;
+    private Menu menu;
 
 
     @Override
@@ -103,6 +102,33 @@ public class MainActivity extends AppCompatActivity implements RefreshInterface 
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        super.onCreateOptionsMenu(menu);
+        MenuItem item = menu.getItem(0);
+        switch (mSettingsHelper.getCurrency()) {
+            case "dollar":
+                item.setTitle(R.string.action_switch_currency_euro);
+                item.setIcon(R.drawable.ic_dollar);
+                break;
+            case "euro":
+                item.setTitle(R.string.action_switch_currency_dollar);
+                item.setIcon(R.drawable.ic_euro);
+                break;
+        }
+        item = menu.getItem(1);
+        switch (mSettingsHelper.getSortOrder()) {
+            case "index":
+                item.setTitle(R.string.action_order_descending);
+                item.setIcon(R.drawable.ic_index);
+                break;
+            case "descending":
+                item.setTitle(R.string.action_order_ascending);
+                item.setIcon(R.drawable.ic_descending);
+                break;
+            case "ascending":
+                item.setTitle(R.string.action_order_index);
+                item.setIcon(R.drawable.ic_ascending);
+                break;
+        }
         return true;
     }
 
@@ -144,13 +170,13 @@ public class MainActivity extends AppCompatActivity implements RefreshInterface 
                 mSettingsHelper.switchCurrency();
                 switch (mSettingsHelper.getCurrency()) {
                     case "dollar":
-                        item.setTitle(R.string.action_switch_currency_dollar);
+                        item.setTitle(R.string.action_switch_currency_euro);
                         item.setIcon(R.drawable.ic_dollar);
                         Snackbar.make(this.mListView, R.string.switch_currency_dollar, Snackbar.LENGTH_SHORT).show();
 
                         break;
                     case "euro":
-                        item.setTitle(R.string.action_switch_currency_euro);
+                        item.setTitle(R.string.action_switch_currency_dollar);
                         item.setIcon(R.drawable.ic_euro);
                         Snackbar.make(this.mListView, R.string.switch_currency_euro, Snackbar.LENGTH_SHORT).show();
                         break;

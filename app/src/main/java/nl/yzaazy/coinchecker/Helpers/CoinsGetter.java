@@ -103,7 +103,6 @@ public class CoinsGetter implements CoinGetterInterface {
     private void updateUI(List<Coin> SpinnerList) {
         mSpinnerList.clear();
         mSpinnerList.addAll(SpinnerList);
-        Collections.sort(mSpinnerList);
         mPDialog.cancel();
         mSpinnerDialog.showSpinerDialog();
     }
