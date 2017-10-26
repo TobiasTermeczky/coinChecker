@@ -9,10 +9,6 @@
     tools:context="nl.yzaazy.coinchecker.MainActivity"
     tools:showIn="@layout/activity_main">
 
-    <android.support.constraint.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
         <ListView
             android:id="@+id/lvCoins"
             android:layout_width="0dp"
@@ -28,8 +24,6 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginTop="0dp" />
-
-    </android.support.constraint.ConstraintLayout>
 
 
 </android.support.v4.widget.SwipeRefreshLayout>
