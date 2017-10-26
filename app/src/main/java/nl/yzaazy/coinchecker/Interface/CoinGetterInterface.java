@@ -1,8 +1,10 @@
 package nl.yzaazy.coinchecker.Interface;
 
 
-import java.util.ArrayList;
+import java.util.List;
+
+import nl.yzaazy.coinchecker.Objects.Coin;
 
 public interface CoinGetterInterface {
-    void coinGetterCallback(ArrayList<String> mNameList);
+    void coinGetterCallback(List<Coin> mSpinnerList);
 }

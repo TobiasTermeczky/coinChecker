@@ -15,7 +15,10 @@ import com.orm.SugarRecord;
 
 import java.util.Objects;
 
+import nl.yzaazy.coinchecker.Adapter.ListAdapter;
+import nl.yzaazy.coinchecker.Adapter.SpinnerAdapter;
 import nl.yzaazy.coinchecker.Helpers.ImageSaver;
+import nl.yzaazy.coinchecker.Helpers.VolleyHelper;
 import nl.yzaazy.coinchecker.Helpers.SettingsHelper;
 import nl.yzaazy.coinchecker.Interface.RefreshInterface;
 
@@ -89,6 +92,37 @@ public class Coin extends SugarRecord<Coin> implements Comparable<Coin> {
                 load();
     }
 
+    public Bitmap getSmallIconLocal(final Context context) {
+        return new ImageSaver(context).
+                setFileName(getSymbol()).
+                setDirectoryName("small_icons").
+                load();
+    }
+
+    public void setSmallIconLocal(final Context context, final SpinnerAdapter adapter) {
+        ImageRequest imageRequest = new ImageRequest(
+                this.getIconUrl(),
+                new Response.Listener<Bitmap>() {
+                    @Override
+                    public void onResponse(Bitmap response) {
+                        new ImageSaver(context).setFileName(getSymbol()).setDirectoryName("small_icons").save(response);
+                        adapter.notifyDataSetChanged();
+                    }
+                },64,64,
+                ImageView.ScaleType.CENTER,
+                Bitmap.Config.RGB_565, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("Coin", "Could not get image");
+            }
+        });
+        VolleyHelper.getInstance(context).addToRequestQueue(imageRequest);
+    }
+
+    public void deleteSmallIconLocal(final Context context){
+        new ImageSaver(context).setFileName(getSymbol()).setDirectoryName("small_icons").deleteFile();
+    }
+
     public Boolean getIsChecked() {
         return IsChecked;
     }
@@ -104,9 +138,7 @@ public class Coin extends SugarRecord<Coin> implements Comparable<Coin> {
                         new ImageSaver(context).setFileName(getSymbol()).setDirectoryName("icons").save(response);
                         refreshInterface.refresh();
                     }
-                },
-                0,
-                0,
+                },0,0,
                 ImageView.ScaleType.CENTER,
                 Bitmap.Config.RGB_565, new Response.ErrorListener() {
             @Override
@@ -120,7 +152,7 @@ public class Coin extends SugarRecord<Coin> implements Comparable<Coin> {
 
     public void removeIsChecked(final Context context) {
         IsChecked = false;
-        Boolean ding = new ImageSaver(context).setFileName(getSymbol()).setDirectoryName("icons").deleteFile();
+        new ImageSaver(context).setFileName(getSymbol()).setDirectoryName("icons").deleteFile();
         save();
     }
 

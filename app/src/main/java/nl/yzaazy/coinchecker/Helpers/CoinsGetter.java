@@ -2,7 +2,11 @@ package nl.yzaazy.coinchecker.Helpers;
 
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -13,13 +17,13 @@ import com.android.volley.toolbox.Volley;
 
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
-import in.galaxyofandroid.spinerdialog.SpinnerDialog;
 import nl.yzaazy.coinchecker.Interface.CoinGetterInterface;
+import nl.yzaazy.coinchecker.Objects.Coin;
 import nl.yzaazy.coinchecker.R;
 import nl.yzaazy.coinchecker.Task.DatabaseCoinGetter;
 import nl.yzaazy.coinchecker.Task.JSONCoinParser;
@@ -28,20 +32,20 @@ public class CoinsGetter implements CoinGetterInterface {
     SettingsHelper settingsHelper = new SettingsHelper();
     String TAG = getClass().getName();
     Context mContext;
-    ArrayList<String> mNameList;
+    List<Coin> mSpinnerList;
     SpinnerDialog mSpinnerDialog;
     SweetAlertDialog mPDialog;
 
-    public CoinsGetter(Context context, ArrayList<String> mNameList, SpinnerDialog spinnerDialog, SweetAlertDialog pDialog) {
+    public CoinsGetter(Context context, List<Coin> mSpinnerList, SpinnerDialog spinnerDialog, SweetAlertDialog pDialog) {
         this.mContext = context;
-        this.mNameList = mNameList;
+        this.mSpinnerList = mSpinnerList;
         this.mSpinnerDialog = spinnerDialog;
         this.mPDialog = pDialog;
     }
 
     @Override
-    public void coinGetterCallback(ArrayList<String> NameList) {
-        updateUI(NameList);
+    public void coinGetterCallback(List<Coin> SpinnerList) {
+        updateUI(SpinnerList);
     }
 
     public void getAllCoins() {
@@ -57,7 +61,10 @@ public class CoinsGetter implements CoinGetterInterface {
             Log.i(TAG, "" + moreThanDay);
         }
 
-        if (moreThanDay) {
+        ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+
+        if (moreThanDay & activeNetwork != null) {
             mPDialog.setTitleText(mContext.getString(R.string.coin_internet));
             mPDialog.show();
             RequestQueue queue = Volley.newRequestQueue(mContext);
@@ -68,7 +75,7 @@ public class CoinsGetter implements CoinGetterInterface {
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
-                            new JSONCoinParser(CoinsGetter.this).execute(response);
+                            new JSONCoinParser(CoinsGetter.this, mContext).execute(response);
                         }
                     },
                     new Response.ErrorListener() {
@@ -83,16 +90,20 @@ public class CoinsGetter implements CoinGetterInterface {
             jsonObjectRequest.setShouldCache(false);
             queue.add(jsonObjectRequest);
         } else {
-            mPDialog.setTitleText(mContext.getString(R.string.coin_database));
+            if(activeNetwork == null){
+                mPDialog.setTitleText(mContext.getString(R.string.coin_database_no_internet));
+            }else {
+                mPDialog.setTitleText(mContext.getString(R.string.coin_database));
+            }
             mPDialog.show();
             new DatabaseCoinGetter(this).execute();
         }
     }
 
-    private void updateUI(ArrayList<String> NameList) {
-        mNameList.clear();
-        mNameList.addAll(NameList);
-        Collections.sort(mNameList);
+    private void updateUI(List<Coin> SpinnerList) {
+        mSpinnerList.clear();
+        mSpinnerList.addAll(SpinnerList);
+        Collections.sort(mSpinnerList);
         mPDialog.cancel();
         mSpinnerDialog.showSpinerDialog();
     }

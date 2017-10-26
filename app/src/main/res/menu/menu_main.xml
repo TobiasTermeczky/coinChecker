@@ -39,4 +39,8 @@
         android:orderInCategory="7"
         android:title="@string/action_force_database"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/delete_icon_small"
+        android:orderInCategory="9999"
+        android:title="@string/delete_all_icons" />
 </menu>

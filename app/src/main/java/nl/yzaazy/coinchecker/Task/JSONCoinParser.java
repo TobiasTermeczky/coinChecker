@@ -1,5 +1,6 @@
 package nl.yzaazy.coinchecker.Task;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -15,18 +16,20 @@ import nl.yzaazy.coinchecker.Helpers.SettingsHelper;
 import nl.yzaazy.coinchecker.Interface.CoinGetterInterface;
 import nl.yzaazy.coinchecker.Objects.Coin;
 
-public class JSONCoinParser extends AsyncTask<JSONObject, Integer, ArrayList<String>> {
+public class JSONCoinParser extends AsyncTask<JSONObject, Integer, List<Coin>> {
     private String TAG = getClass().getName();
     private SettingsHelper settingsHelper = new SettingsHelper();
-    private ArrayList<String> mNameList = new ArrayList<>();
+    private List<Coin> mSpinnerList = new ArrayList<>();
     private CoinGetterInterface mListener;
+    private Context context;
 
-    public JSONCoinParser(CoinGetterInterface mListener) {
+    public JSONCoinParser(CoinGetterInterface mListener, Context context) {
         this.mListener = mListener;
+        this.context = context;
     }
 
     @Override
-    protected ArrayList<String> doInBackground(JSONObject... jsonObjects) {
+    protected List<Coin> doInBackground(JSONObject... jsonObjects) {
         JSONObject response = jsonObjects[0];
         try {
             JSONObject data = response.getJSONObject("Data");
@@ -50,7 +53,7 @@ public class JSONCoinParser extends AsyncTask<JSONObject, Integer, ArrayList<Str
                         coin.setIconUrl(null);
                     }
                     coin.save();
-                    mNameList.add(coin.getName());
+                    mSpinnerList.add(coin);
                 } catch (JSONException e) {
                     Log.w(TAG, "Skipped 1, couldn't save coin!");
 
@@ -60,12 +63,12 @@ public class JSONCoinParser extends AsyncTask<JSONObject, Integer, ArrayList<Str
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return mNameList;
+        return mSpinnerList;
     }
 
     @Override
-    protected void onPostExecute(ArrayList<String> mNameList) {
-        mListener.coinGetterCallback(mNameList);
+    protected void onPostExecute(List<Coin> mSpinnerList) {
+        mListener.coinGetterCallback(mSpinnerList);
 
     }
 }

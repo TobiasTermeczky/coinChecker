@@ -47,6 +47,7 @@
     <string name="delete_all_notification">All unlocked coin checkers are removed</string>
     <string name="remove_all_question">Are you sure?</string>
     <string name="remove_all_info">This action will remove all coins from being checked!</string>
+    <string name="remove_all_icons_info">This action will remove all icons from the device!</string>
 
     <string name="yes">Yes</string>
 
@@ -56,5 +57,11 @@
     <string name="unlock_all">Unlock all</string>
     <string name="all_coins_locked">All coins are now locked</string>
     <string name="all_coins_unlocked">All coins are now unlocked</string>
+    <string name="close">Close</string>
+    <string name="search_icon">search_icon</string>
+    <string name="small_icon">small_icon</string>
+    <string name="no_internet">No internet</string>
+    <string name="delete_all_icons">Delete all icons</string>
+    <string name="icon_remove_all">All small icons are removed</string>
 
 </resources>
