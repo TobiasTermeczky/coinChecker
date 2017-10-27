@@ -263,7 +263,7 @@ public class MainActivity extends AppCompatActivity implements RefreshInterface 
         CoinsGetter mCoinsGetter = new CoinsGetter(getApplicationContext(), mSpinnerList, mSpinnerDialog, pDialog);
         mCoinsGetter.getAllCoins();
         //todo: create own spinner with better search and other cool stuff like custom list view.
-        mSpinnerDialog.bindOnSpinerListener(new OnSpinnerItemClick() {
+        mSpinnerDialog.bindOnSpinnerListener(new OnSpinnerItemClick() {
             @Override
             public void onClick(Coin coin) {
                 if (coin.getIsChecked()) {

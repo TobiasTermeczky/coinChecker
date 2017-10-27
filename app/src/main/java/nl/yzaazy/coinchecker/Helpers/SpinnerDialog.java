@@ -32,11 +32,11 @@ public class SpinnerDialog implements AdapterView.OnItemClickListener {
         this.context = activity;
     }
 
-    public void bindOnSpinerListener(OnSpinnerItemClick onSpinnerItemClick1) {
+    public void bindOnSpinnerListener(OnSpinnerItemClick onSpinnerItemClick1) {
         this.onSpinnerItemClick = onSpinnerItemClick1;
     }
 
-    public void showSpinerDialog() {
+    public void showSpinnerDialog() {
         AlertDialog.Builder adb = new AlertDialog.Builder(context, R.style.MyAlertDialogTheme);
         View v = context.getLayoutInflater().inflate(R.layout.dialog_layout, null);
         TextView rippleViewClose = v.findViewById(R.id.close);

@@ -5,8 +5,6 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
-import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -17,7 +15,6 @@ import com.android.volley.toolbox.Volley;
 
 import org.json.JSONObject;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -104,6 +101,6 @@ public class CoinsGetter implements CoinGetterInterface {
         mSpinnerList.clear();
         mSpinnerList.addAll(SpinnerList);
         mPDialog.cancel();
-        mSpinnerDialog.showSpinerDialog();
+        mSpinnerDialog.showSpinnerDialog();
     }
 }
