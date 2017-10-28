@@ -7,6 +7,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,10 +16,15 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageRequest;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import nl.yzaazy.coinchecker.Helpers.VolleyHelper;
 import nl.yzaazy.coinchecker.Objects.Coin;
 import nl.yzaazy.coinchecker.R;
 
@@ -45,9 +51,11 @@ public class SpinnerRecyclerAdapter extends RecyclerView.Adapter<SpinnerRecycler
     public void onBindViewHolder(final ViewHolder holder, int position) {
         final Coin coin = filteredData.get(position);
         holder.icon.setAlpha(0f);
+        holder.icon.setImageBitmap(null);
         holder.progress.setAlpha(1f);
         holder.name.setText(coin.getName());
         holder.symbol.setText(coin.getSymbol());
+        final String uniqueId = coin.getIconUrl();
 
         //todo fix images not loading correctly
         if (coin.getSmallIconLocal(context) == null) {
@@ -55,13 +63,32 @@ public class SpinnerRecyclerAdapter extends RecyclerView.Adapter<SpinnerRecycler
             NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
             if (activeNetwork != null) {
                 if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI) {
-                    ImageListener imageListener = new ImageListener() {
+//                    ImageListener imageListener = new ImageListener() {
+//                        @Override
+//                        public void newImage(Bitmap bitmap, String bitMapUniqueId) {
+//                            if(Objects.equals(uniqueId, bitMapUniqueId))
+//                                setBitmap(holder, bitmap);
+//                        }
+//                    };
+//                    coin.setSmallIconLocal(context, imageListener, uniqueId);
+                    ImageRequest imageRequest = new ImageRequest(
+                            coin.getIconUrl(),
+                            new Response.Listener<Bitmap>() {
+                                @Override
+                                public void onResponse(Bitmap response) {
+                                    coin.setSmallIconLocal(context, response);
+                                    setBitmap(holder, response);
+                                }
+                            }, 64, 64,
+                            ImageView.ScaleType.CENTER,
+                            Bitmap.Config.RGB_565, new Response.ErrorListener() {
                         @Override
-                        public void newImage(Bitmap bitmap, Coin checkCoin) {
-                                setBitmap(holder, bitmap);
+                        public void onErrorResponse(VolleyError error) {
+                            Log.e("Coin", "Could not get image");
                         }
-                    };
-                    coin.setSmallIconLocal(context, imageListener, coin);
+                    });
+                    imageRequest.setTag(coin.getSymbol());
+                    VolleyHelper.getInstance(context).addToRequestQueue(imageRequest);
                 } else {
                     setBitmap(holder, BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_no_image));
                 }
@@ -85,8 +112,15 @@ public class SpinnerRecyclerAdapter extends RecyclerView.Adapter<SpinnerRecycler
                 }
             }.execute(holder);
         }
+    }
 
-
+    @Override
+    public void onViewRecycled(ViewHolder holder) {
+        for(Coin coin : originalData){
+            if(Objects.equals(coin.getSymbol(), holder.symbol.getText())){
+                VolleyHelper.getInstance(context).cancelRequest(coin.getSymbol());
+            }
+        }
     }
 
     private void setBitmap(ViewHolder holder, Bitmap bitmap) {
@@ -106,10 +140,6 @@ public class SpinnerRecyclerAdapter extends RecyclerView.Adapter<SpinnerRecycler
 
     public Filter getFilter() {
         return mFilter;
-    }
-
-    public interface ImageListener {
-        void newImage(Bitmap bitmap, Coin coin);
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
