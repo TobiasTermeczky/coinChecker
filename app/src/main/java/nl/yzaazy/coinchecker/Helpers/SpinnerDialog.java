@@ -35,7 +35,7 @@ public class SpinnerDialog {
     public void showSpinnerDialog() {
         AlertDialog.Builder adb = new AlertDialog.Builder(context, R.style.MyAlertDialogTheme);
         View v = context.getLayoutInflater().inflate(R.layout.dialog_layout, null);
-        TextView rippleViewClose = v.findViewById(R.id.close);
+        TextView dialogClose = v.findViewById(R.id.close);
         final EditText searchBox = v.findViewById(R.id.searchBox);
 
         RecyclerView recyclerView = v.findViewById(R.id.list);
@@ -52,6 +52,7 @@ public class SpinnerDialog {
                             @Override
                             public void onClick(View view, int position) {
                                 refreshInterface.setCoinChecked(adapter.getItem(position));
+                                alertDialog.dismiss();
                             }
                         }));
         adb.setView(v);
@@ -75,7 +76,7 @@ public class SpinnerDialog {
             }
         });
 
-        rippleViewClose.setOnClickListener(new View.OnClickListener() {
+        dialogClose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 alertDialog.dismiss();

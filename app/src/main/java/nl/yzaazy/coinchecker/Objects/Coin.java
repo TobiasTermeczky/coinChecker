@@ -15,7 +15,7 @@ import com.orm.SugarRecord;
 
 import java.util.Objects;
 
-import nl.yzaazy.coinchecker.Adapter.SpinnerAdapter;
+import nl.yzaazy.coinchecker.Adapter.SpinnerRecyclerAdapter;
 import nl.yzaazy.coinchecker.Helpers.ImageSaver;
 import nl.yzaazy.coinchecker.Helpers.SettingsHelper;
 import nl.yzaazy.coinchecker.Helpers.VolleyHelper;
@@ -100,14 +100,14 @@ public class Coin extends SugarRecord<Coin> implements Comparable<Coin> {
                 load();
     }
 
-    public void setSmallIconLocal(final Context context, final SpinnerAdapter adapter) {
+    public void setSmallIconLocal(final Context context, final SpinnerRecyclerAdapter.ImageListener imageListener, final Coin coin) {
         ImageRequest imageRequest = new ImageRequest(
                 this.getIconUrl(),
                 new Response.Listener<Bitmap>() {
                     @Override
                     public void onResponse(Bitmap response) {
                         new ImageSaver(context).setFileName(getSymbol()).setDirectoryName("small_icons").save(response);
-                        adapter.notifyDataSetChanged();
+                        imageListener.newImage(response, coin);
                     }
                 }, 64, 64,
                 ImageView.ScaleType.CENTER,
