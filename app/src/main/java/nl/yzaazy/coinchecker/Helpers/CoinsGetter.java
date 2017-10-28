@@ -26,18 +26,18 @@ import nl.yzaazy.coinchecker.Task.DatabaseCoinGetter;
 import nl.yzaazy.coinchecker.Task.JSONCoinParser;
 
 public class CoinsGetter implements CoinGetterInterface {
-    SettingsHelper settingsHelper = new SettingsHelper();
-    String TAG = getClass().getName();
-    Context mContext;
-    List<Coin> mSpinnerList;
-    SpinnerDialog mSpinnerDialog;
-    SweetAlertDialog mPDialog;
+    private SettingsHelper settingsHelper = new SettingsHelper();
+    private String TAG = getClass().getName();
+    private Context context;
+    private List<Coin> spinnerList;
+    private SpinnerDialog spinnerDialog;
+    private SweetAlertDialog pDialog;
 
-    public CoinsGetter(Context context, List<Coin> mSpinnerList, SpinnerDialog spinnerDialog, SweetAlertDialog pDialog) {
-        this.mContext = context;
-        this.mSpinnerList = mSpinnerList;
-        this.mSpinnerDialog = spinnerDialog;
-        this.mPDialog = pDialog;
+    public CoinsGetter(Context context, List<Coin> spinnerList, SpinnerDialog spinnerDialog, SweetAlertDialog pDialog) {
+        this.context = context;
+        this.spinnerList = spinnerList;
+        this.spinnerDialog = spinnerDialog;
+        this.pDialog = pDialog;
     }
 
     @Override
@@ -58,13 +58,13 @@ public class CoinsGetter implements CoinGetterInterface {
             Log.i(TAG, "" + moreThanDay);
         }
 
-        ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
 
         if (moreThanDay & activeNetwork != null) {
-            mPDialog.setTitleText(mContext.getString(R.string.coin_internet));
-            mPDialog.show();
-            RequestQueue queue = Volley.newRequestQueue(mContext);
+            pDialog.setTitleText(context.getString(R.string.coin_internet));
+            pDialog.show();
+            RequestQueue queue = Volley.newRequestQueue(context);
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
                     Request.Method.GET,
                     "https://www.cryptocompare.com/api/data/coinlist/",
@@ -72,15 +72,16 @@ public class CoinsGetter implements CoinGetterInterface {
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
-                            new JSONCoinParser(CoinsGetter.this, mContext).execute(response);
+                            pDialog.setTitleText(context.getString(R.string.save_coin_internet));
+                            new JSONCoinParser(CoinsGetter.this, pDialog).execute(response);
                         }
                     },
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            mPDialog.cancel();
-                            mPDialog.setTitleText(mContext.getString(R.string.coin_database_no_internet));
-                            mPDialog.show();
+                            pDialog.cancel();
+                            pDialog.setTitleText(context.getString(R.string.coin_database_no_internet));
+                            pDialog.show();
                             new DatabaseCoinGetter(CoinsGetter.this).execute();
                         }
                     });
@@ -88,19 +89,19 @@ public class CoinsGetter implements CoinGetterInterface {
             queue.add(jsonObjectRequest);
         } else {
             if(activeNetwork == null){
-                mPDialog.setTitleText(mContext.getString(R.string.coin_database_no_internet));
+                pDialog.setTitleText(context.getString(R.string.coin_database_no_internet));
             }else {
-                mPDialog.setTitleText(mContext.getString(R.string.coin_database));
+                pDialog.setTitleText(context.getString(R.string.coin_database));
             }
-            mPDialog.show();
+            pDialog.show();
             new DatabaseCoinGetter(this).execute();
         }
     }
 
     private void updateUI(List<Coin> SpinnerList) {
-        mSpinnerList.clear();
-        mSpinnerList.addAll(SpinnerList);
-        mPDialog.cancel();
-        mSpinnerDialog.showSpinnerDialog();
+        spinnerList.clear();
+        spinnerList.addAll(SpinnerList);
+        pDialog.dismissWithAnimation();
+        spinnerDialog.showSpinnerDialog();
     }
 }

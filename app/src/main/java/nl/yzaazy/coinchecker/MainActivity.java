@@ -18,6 +18,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 
+import com.pnikosis.materialishprogress.ProgressWheel;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
