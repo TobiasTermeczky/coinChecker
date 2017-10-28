@@ -62,7 +62,7 @@ public class SpinnerAdapter extends BaseAdapter {
             viewHolder.icon = convertView.findViewById(R.id.dialog_icon);
             viewHolder.name = convertView.findViewById(R.id.dialog_name);
             viewHolder.symbol = convertView.findViewById(R.id.dialog_symbol);
-            viewHolder.progress = convertView.findViewById(R.id.progress_spinner);
+            viewHolder.progress = convertView.findViewById(R.id.dialog_progress_spinner);
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
@@ -110,10 +110,6 @@ public class SpinnerAdapter extends BaseAdapter {
         return convertView;
     }
 
-    public Filter getFilter() {
-        return mFilter;
-    }
-
     private static class ViewHolder {
         ImageView icon;
         TextView name;
@@ -122,7 +118,11 @@ public class SpinnerAdapter extends BaseAdapter {
         int position;
     }
 
-    private class ItemFilter extends Filter {
+    public Filter getFilter() {
+        return mFilter;
+    }
+
+    class ItemFilter extends Filter {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             String filterString = constraint.toString().toLowerCase();

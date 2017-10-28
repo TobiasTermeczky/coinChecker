@@ -1,53 +1,63 @@
 package nl.yzaazy.coinchecker.Helpers;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.List;
 
-import nl.yzaazy.coinchecker.Adapter.SpinnerAdapter;
-import nl.yzaazy.coinchecker.Interface.OnSpinnerItemClick;
+import nl.yzaazy.coinchecker.Adapter.SpinnerRecyclerAdapter;
+import nl.yzaazy.coinchecker.Interface.RefreshInterface;
+import nl.yzaazy.coinchecker.Listener.RecyclerTouchListener;
 import nl.yzaazy.coinchecker.Objects.Coin;
 import nl.yzaazy.coinchecker.R;
 
-public class SpinnerDialog implements AdapterView.OnItemClickListener {
+public class SpinnerDialog {
     private List<Coin> items;
     private Activity context;
-    private OnSpinnerItemClick onSpinnerItemClick;
     private AlertDialog alertDialog;
-    private SpinnerAdapter adapter;
+    private SpinnerRecyclerAdapter adapter;
+    private RefreshInterface refreshInterface;
 
 
-    public SpinnerDialog(Activity activity, List<Coin> items) {
+    public SpinnerDialog(Activity activity, List<Coin> items, RefreshInterface refreshInterface) {
         this.items = items;
         this.context = activity;
-    }
-
-    public void bindOnSpinnerListener(OnSpinnerItemClick onSpinnerItemClick1) {
-        this.onSpinnerItemClick = onSpinnerItemClick1;
+        this.refreshInterface = refreshInterface;
     }
 
     public void showSpinnerDialog() {
         AlertDialog.Builder adb = new AlertDialog.Builder(context, R.style.MyAlertDialogTheme);
         View v = context.getLayoutInflater().inflate(R.layout.dialog_layout, null);
         TextView rippleViewClose = v.findViewById(R.id.close);
-        final ListView listView = v.findViewById(R.id.list);
         final EditText searchBox = v.findViewById(R.id.searchBox);
-        adapter = new SpinnerAdapter(items, context.getLayoutInflater(), context);
-        listView.setAdapter(adapter);
+
+        RecyclerView recyclerView = v.findViewById(R.id.list);
+        recyclerView.setHasFixedSize(true);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
+        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        recyclerView.setLayoutManager(linearLayoutManager);
+
+        adapter = new SpinnerRecyclerAdapter(context, items);
+        recyclerView.setAdapter(adapter);
+        recyclerView.addOnItemTouchListener(
+                new RecyclerTouchListener(context,
+                        new RecyclerTouchListener.ClickListener() {
+                            @Override
+                            public void onClick(View view, int position) {
+                                refreshInterface.setCoinChecked(adapter.getItem(position));
+                            }
+                        }));
         adb.setView(v);
         alertDialog = adb.create();
         alertDialog.setCancelable(true);
-        listView.setOnItemClickListener(this);
+
         searchBox.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -72,11 +82,5 @@ public class SpinnerDialog implements AdapterView.OnItemClickListener {
             }
         });
         alertDialog.show();
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        onSpinnerItemClick.onClick(adapter.getItem(i));
-        alertDialog.cancel();
     }
 }
