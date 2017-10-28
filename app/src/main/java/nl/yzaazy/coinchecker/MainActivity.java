@@ -18,6 +18,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 
+import com.pnikosis.materialishprogress.ProgressWheel;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -31,9 +33,8 @@ import nl.yzaazy.coinchecker.Helpers.CoinsDataGetter;
 import nl.yzaazy.coinchecker.Helpers.CoinsGetter;
 import nl.yzaazy.coinchecker.Helpers.SettingsHelper;
 import nl.yzaazy.coinchecker.Helpers.SpinnerDialog;
-import nl.yzaazy.coinchecker.Helpers.SwipeDismissListViewtouchListener;
-import nl.yzaazy.coinchecker.Interface.OnSpinnerItemClick;
 import nl.yzaazy.coinchecker.Interface.RefreshInterface;
+import nl.yzaazy.coinchecker.Listener.SwipeDismissListViewtouchListener;
 import nl.yzaazy.coinchecker.Objects.Coin;
 
 public class MainActivity extends AppCompatActivity implements RefreshInterface {
@@ -259,24 +260,9 @@ public class MainActivity extends AppCompatActivity implements RefreshInterface 
         SweetAlertDialog pDialog = new SweetAlertDialog(MainActivity.this, SweetAlertDialog.PROGRESS_TYPE);
         pDialog.getProgressHelper().setBarColor(Color.parseColor("#3F51B5"));
         pDialog.setCancelable(false);
-        SpinnerDialog mSpinnerDialog = new SpinnerDialog(MainActivity.this, mSpinnerList);
+        SpinnerDialog mSpinnerDialog = new SpinnerDialog(MainActivity.this, mSpinnerList, this);
         CoinsGetter mCoinsGetter = new CoinsGetter(getApplicationContext(), mSpinnerList, mSpinnerDialog, pDialog);
         mCoinsGetter.getAllCoins();
-        //todo: create own spinner with better search and other cool stuff like custom list view.
-        mSpinnerDialog.bindOnSpinerListener(new OnSpinnerItemClick() {
-            @Override
-            public void onClick(Coin coin) {
-                if (coin.getIsChecked()) {
-                    Snackbar.make(mListView, R.string.duplicate_coin_input, Snackbar.LENGTH_SHORT).show();
-                } else {
-                    coin.setIsChecked(getApplicationContext(), MainActivity.this);
-                    mCoinList = Coin.find(Coin.class, "is_checked = ?", "1");
-                    Snackbar.make(mListView, R.string.saved_coin_to_check, Snackbar.LENGTH_SHORT).show();
-                    updateUI();
-                }
-                mAdapter.notifyDataSetChanged();
-            }
-        });
     }
 
     private void updateUI() {
@@ -299,6 +285,19 @@ public class MainActivity extends AppCompatActivity implements RefreshInterface 
         Collections.sort(mCoinList);
         mAdapter = new ListAdapter(getApplicationContext(), mCoinList, getLayoutInflater());
         mListView.setAdapter(mAdapter);
+        mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void setCoinChecked(Coin coin) {
+        if (coin.getIsChecked()) {
+            Snackbar.make(mListView, R.string.duplicate_coin_input, Snackbar.LENGTH_SHORT).show();
+        } else {
+            coin.setIsChecked(getApplicationContext(), MainActivity.this);
+            mCoinList = Coin.find(Coin.class, "is_checked = ?", "1");
+            Snackbar.make(mListView, R.string.saved_coin_to_check, Snackbar.LENGTH_SHORT).show();
+            updateUI();
+        }
         mAdapter.notifyDataSetChanged();
     }
 }

@@ -23,6 +23,7 @@
     <string name="action_force_database">Force Update DB</string>
     <string name="force_database">Reload database form internet next time</string>
     <string name="coin_internet">Loading coins from internet</string>
+    <string name="save_coin_internet">Saving coins to database</string>
     <string name="coin_database">Loading coins from database</string>
     <string name="coin_database_no_internet">No internet! Loading database</string>
     <string name="no_price">No price available!</string>

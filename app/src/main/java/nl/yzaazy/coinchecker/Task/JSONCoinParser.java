@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import nl.yzaazy.coinchecker.Helpers.SettingsHelper;
 import nl.yzaazy.coinchecker.Interface.CoinGetterInterface;
 import nl.yzaazy.coinchecker.Objects.Coin;
@@ -21,11 +22,11 @@ public class JSONCoinParser extends AsyncTask<JSONObject, Integer, List<Coin>> {
     private SettingsHelper settingsHelper = new SettingsHelper();
     private List<Coin> mSpinnerList = new ArrayList<>();
     private CoinGetterInterface mListener;
-    private Context context;
+    private SweetAlertDialog pDialog;
 
-    public JSONCoinParser(CoinGetterInterface mListener, Context context) {
+    public JSONCoinParser(CoinGetterInterface mListener, SweetAlertDialog pDialog) {
         this.mListener = mListener;
-        this.context = context;
+        this.pDialog = pDialog;
     }
 
     @Override
@@ -33,6 +34,8 @@ public class JSONCoinParser extends AsyncTask<JSONObject, Integer, List<Coin>> {
         JSONObject response = jsonObjects[0];
         try {
             JSONObject data = response.getJSONObject("Data");
+            int length = data.length();
+            int i = 0;
             Iterator<String> temp = data.keys();
             while (temp.hasNext()) {
                 try {
@@ -58,12 +61,22 @@ public class JSONCoinParser extends AsyncTask<JSONObject, Integer, List<Coin>> {
                     Log.w(TAG, "Skipped 1, couldn't save coin!");
 
                 }
+                i++;
+                publishProgress(i, length);
             }
             settingsHelper.setJSONDate(new Date());
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return mSpinnerList;
+    }
+
+    @Override
+    protected void onProgressUpdate(Integer... values) {
+        super.onProgressUpdate(values);
+        float percentage = (float) values[0]/values[1];
+        Log.w(TAG, percentage + "%");
+        pDialog.getProgressHelper().setInstantProgress(percentage);
     }
 
     @Override

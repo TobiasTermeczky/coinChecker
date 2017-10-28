@@ -15,10 +15,8 @@ import com.orm.SugarRecord;
 
 import java.util.Objects;
 
-import nl.yzaazy.coinchecker.Adapter.SpinnerAdapter;
 import nl.yzaazy.coinchecker.Helpers.ImageSaver;
 import nl.yzaazy.coinchecker.Helpers.SettingsHelper;
-import nl.yzaazy.coinchecker.Helpers.VolleyHelper;
 import nl.yzaazy.coinchecker.Interface.RefreshInterface;
 
 public class Coin extends SugarRecord<Coin> implements Comparable<Coin> {
@@ -100,24 +98,25 @@ public class Coin extends SugarRecord<Coin> implements Comparable<Coin> {
                 load();
     }
 
-    public void setSmallIconLocal(final Context context, final SpinnerAdapter adapter) {
-        ImageRequest imageRequest = new ImageRequest(
-                this.getIconUrl(),
-                new Response.Listener<Bitmap>() {
-                    @Override
-                    public void onResponse(Bitmap response) {
-                        new ImageSaver(context).setFileName(getSymbol()).setDirectoryName("small_icons").save(response);
-                        adapter.notifyDataSetChanged();
-                    }
-                }, 64, 64,
-                ImageView.ScaleType.CENTER,
-                Bitmap.Config.RGB_565, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e("Coin", "Could not get image");
-            }
-        });
-        VolleyHelper.getInstance(context).addToRequestQueue(imageRequest);
+    public void setSmallIconLocal(Context context, Bitmap response) {
+        new ImageSaver(context).setFileName(getSymbol()).setDirectoryName("small_icons").save(response);
+//        ImageRequest imageRequest = new ImageRequest(
+//                this.getIconUrl(),
+//                new Response.Listener<Bitmap>() {
+//                    @Override
+//                    public void onResponse(Bitmap response) {
+//                        new ImageSaver(context).setFileName(getSymbol()).setDirectoryName("small_icons").save(response);
+//                        imageListener.newImage(response, uniqueId);
+//                    }
+//                }, 64, 64,
+//                ImageView.ScaleType.CENTER,
+//                Bitmap.Config.RGB_565, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                Log.e("Coin", "Could not get image");
+//            }
+//        });
+//        VolleyHelper.getInstance(context).addToRequestQueue(imageRequest);
     }
 
     public void deleteSmallIconLocal(final Context context) {
@@ -229,19 +228,27 @@ public class Coin extends SugarRecord<Coin> implements Comparable<Coin> {
         Double localValue = null;
         Double coinValue = null;
 
-        switch (new SettingsHelper().getCurrency()){
+        switch (new SettingsHelper().getCurrency()) {
             case "dollar":
-                try{
+                try {
                     localValue = Double.parseDouble(percentChangeUsd24h);
                     coinValue = Double.parseDouble(coin.getPercentChangeUsd24h());
-                }catch(Exception ignored){}
+                } catch (Exception ignored) {
+                }
                 break;
             case "euro":
-                try{
-                localValue = Double.parseDouble(percentChangeEur24h);
-                coinValue = Double.parseDouble(coin.getPercentChangeEur24h());
-                }catch(Exception ignored){}
+                try {
+                    localValue = Double.parseDouble(percentChangeEur24h);
+                    coinValue = Double.parseDouble(coin.getPercentChangeEur24h());
+                } catch (Exception ignored) {
+                }
                 break;
+            case "btc":
+                try{
+                    localValue = Double.parseDouble(percentChangeBtc24h);
+                    coinValue = Double.parseDouble(coin.getPercentChangeBtc24h());
+                } catch (Exception ignored){
+                }
         }
 
         if (coinValue != null && localValue != null) {

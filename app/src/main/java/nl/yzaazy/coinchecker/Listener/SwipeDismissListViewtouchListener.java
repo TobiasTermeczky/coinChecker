@@ -1,4 +1,4 @@
-package nl.yzaazy.coinchecker.Helpers;
+package nl.yzaazy.coinchecker.Listener;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
